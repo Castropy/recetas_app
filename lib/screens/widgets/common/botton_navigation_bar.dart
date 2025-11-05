@@ -1,49 +1,38 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:recetas_app/screens/Screen_inventario/screen_inventario.dart';
+import 'package:recetas_app/screens/Screen_recetas/Screen_recetas.dart';
+import 'package:recetas_app/screens/Screen_reporte/screen_reporte.dart';
+import 'package:recetas_app/screens/Screen_vender/screen_vender.dart'; 
 
-class BottonNavigationBar extends StatelessWidget {
-  const BottonNavigationBar({super.key});
+class BottomNavBarProvider with ChangeNotifier {
+  
+  // Variable para almacenar el índice de la pantalla actual.
+  int _currentIndex = 0;
 
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      selectedItemColor: const Color.fromARGB(255, 247, 247, 248),
+  // Getter para obtener el índice actual.
+  int get currentIndex => _currentIndex;
 
-      // Establece el color de ícono y label cuando NO está seleccionado
-      unselectedItemColor: const Color.fromARGB(197, 192, 189, 189),
-      backgroundColor: const Color.fromARGB(148, 10, 6, 243),
-      items: const <BottomNavigationBarItem>[
-        // Primer Ítem
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.food_bank_sharp,
-            color: Colors.white,
-          ),
-          label: 'Recetas',
-        ),
-        // Segundo Ítem
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.sell_rounded,
-            color: Colors.white,
-          ),
-          label: 'Nueva Venta',
-        ),
-        // Tercer Ítem
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.inventory_rounded,
-            color: Colors.white,
-          ),
-          label: 'Inventario',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(
-            Icons.file_present,
-            color: Colors.white,
-          ),
-          label: 'Reportes',
-        ),
-      ],
-    );
+  // Método para actualizar el índice.
+  void updateIndex(int newIndex) {
+    if (newIndex != _currentIndex) {
+      _currentIndex = newIndex;
+      // Notifica a los widgets "oyentes" para que se reconstruyan.
+      notifyListeners(); 
+    }
   }
-}
+}  
+
+
+// Ejemplo de pantallas para cada índice
+
+final List<Widget> _screens = [
+  ScreenRecetas(), // Primera pantalla
+  ScreenVender(), // Segunda pantalla 
+  ScreenReporte(), // Tercera pantalla
+  ScreenInventario(), // Cuarta pantalla
+]; 
+
+
+
+
+
