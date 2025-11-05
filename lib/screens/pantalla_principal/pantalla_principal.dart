@@ -34,13 +34,13 @@ class PantallaPrincipal extends StatelessWidget {
         backgroundColor: const Color.fromARGB(255, 45, 85, 216),
 
         // 2. Tamaños
-        iconSize: 50, // Tamaño del Icono (todos)
+        iconSize: 30, // Tamaño del Icono (todos)
         selectedLabelStyle: const TextStyle(
-          fontSize: 25, // Tamaño de la etiqueta seleccionada
+          fontSize: 20, // Tamaño de la etiqueta seleccionada
           fontWeight: FontWeight.w900,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontSize: 20,
+          fontSize: 16,
           fontWeight: FontWeight.w900, // Tamaño de la etiqueta no seleccionada
         ),
         // 2. Usar el índice actual del Provider
