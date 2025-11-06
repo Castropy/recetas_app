@@ -4,7 +4,7 @@ import 'package:recetas_app/screens/Screen_inventario/screen_inventario.dart';
 import 'package:recetas_app/screens/Screen_recetas/Screen_recetas.dart';
 import 'package:recetas_app/screens/Screen_reporte/screen_reporte.dart';
 import 'package:recetas_app/screens/Screen_vender/screen_vender.dart';
-import 'package:recetas_app/screens/widgets/common/botton_navigation_bar.dart';
+import 'package:recetas_app/providers/botton_nav_provider.dart';
 
 class PantallaPrincipal extends StatelessWidget {
    PantallaPrincipal({super.key}); 
@@ -52,7 +52,7 @@ class PantallaPrincipal extends StatelessWidget {
           context.read<BottomNavBarProvider>().updateIndex(index); 
         },
         
-        type: BottomNavigationBarType.fixed, // Recomendado para 4 ítems
+        type: BottomNavigationBarType.fixed, //  4 ítems
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.list_alt_sharp), label: 'Recetas'),
           BottomNavigationBarItem(icon: Icon(Icons.monetization_on_sharp), label: 'Vender'),

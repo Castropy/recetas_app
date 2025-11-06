@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
-import 'package:recetas_app/screens/widgets/common/botton_navigation_bar.dart';
-
+import 'package:recetas_app/providers/botton_nav_provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => BottomNavBarProvider(),
+    MultiProvider( // Usar MultiProvider para inyectar múltiples estados
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => BottomNavBarProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FormVisibilityNotifier(),
+        ),
+        
+      ],
       child: MyApp(),
     ),
   );
