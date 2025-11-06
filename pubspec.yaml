@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  drift: ^2.29.0
+  drift_flutter: ^0.2.7
+  path_provider: ^2.1.5
     
 
   # The following adds the Cupertino Icons font to your application.
@@ -40,6 +43,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.29.0
+  build_runner: ^2.4.6
+    
     
 
   # The "flutter_lints" package below contains a set of recommended lints to
