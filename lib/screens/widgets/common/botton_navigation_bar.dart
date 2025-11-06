@@ -25,7 +25,7 @@ class BottomNavBarProvider with ChangeNotifier {
 
 // Ejemplo de pantallas para cada índice
 
-final List<Widget> _screens = [
+final List<Widget> screens = [
   ScreenRecetas(), // Primera pantalla
   ScreenVender(), // Segunda pantalla 
   ScreenReporte(), // Tercera pantalla

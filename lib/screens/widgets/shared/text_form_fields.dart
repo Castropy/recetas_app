@@ -18,7 +18,8 @@ class MyTextFormFields extends StatelessWidget {
         enabledBorder: outlinedborder,
         focusedBorder: outlinedborder,
         filled: true,
-        hintText: 'Escribe aqui',
+        hintText: 'Buscar Recetas',
+        prefixIcon: Icon(Icons.search, color: Colors.grey,),
         
     );
 
