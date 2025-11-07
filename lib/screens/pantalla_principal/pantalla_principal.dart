@@ -24,7 +24,7 @@ class PantallaPrincipal extends StatelessWidget {
             color:  Color.fromARGB(255, 45, 85, 216),
             ),
           ),
-      ),
+      ), 
       // 1. Mostrar la pantalla correspondiente al índice actual
       body: _screens[navBarProvider.currentIndex], 
       

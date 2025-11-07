@@ -17,4 +17,4 @@ class FormVisibilityNotifier extends ChangeNotifier {
     _isVisible = false;
     notifyListeners();
   }
-}
+} 

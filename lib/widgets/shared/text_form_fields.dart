@@ -18,7 +18,7 @@ class MyTextFormFields extends StatelessWidget {
         enabledBorder: outlinedborder,
         focusedBorder: outlinedborder,
         filled: true,
-        hintText: 'Buscar Recetas',
+        hintText: 'Nombre de Receta',
         prefixIcon: Icon(Icons.search, color: Colors.grey,),
         
     );
@@ -54,7 +54,7 @@ class MyTextFormFields2 extends StatelessWidget {
         enabledBorder: outlinedborder,
         focusedBorder: outlinedborder,
         filled: true,
-        hintText: 'Buscar Recetas',
+        hintText: 'Ingredientes',
         prefixIcon: Icon(Icons.search, color: Colors.grey,),
         
     );
@@ -67,7 +67,7 @@ class MyTextFormFields2 extends StatelessWidget {
       
       focusNode: focusNode,
       decoration:  inputDecoration,  
-    );
+    ); 
     
   }
 }
