@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class FloatingActionButtonVender extends StatelessWidget {
   const FloatingActionButtonVender({super.key});
 
@@ -8,6 +9,7 @@ class FloatingActionButtonVender extends StatelessWidget {
     return FloatingActionButton.extended(
     onPressed: () {
     // Lógica al presionar el botón
+    
   },
   label: const Text('Vender'), // 👈texto
   icon: const Icon(Icons.add_card),        // 👈 icono
