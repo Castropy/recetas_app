@@ -70,8 +70,17 @@ class FloatingActionButtonGuardar extends StatelessWidget {
     onPressed: () {
     // Lógica al presionar el botón
   },
-  label: const Text('Guardar'), // 👈texto
-  icon: const Icon(Icons.save_rounded),        // 👈 icono
+  label: const Text(
+    'Guardar',
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 30,
+      ),
+    ), // 👈texto
+  icon: const Icon(
+    Icons.save_rounded,
+    size: 40,
+    ),        // 👈 icono
   backgroundColor: Color.fromARGB(186, 2, 206, 30), // para darle un color
   foregroundColor: Colors.white,
     );

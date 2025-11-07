@@ -6,6 +6,7 @@ import 'package:recetas_app/widgets/shared/text_form_fields.dart';
 //import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
 //import 'package:recetas_app/widgets/shared/text_form_fields.dart';
 
+// Esta es la pantalla de recetas donde se mostraran las recetas y el formulario para crear nuevas recetas
 class ScreenRecetas extends StatelessWidget {
   const ScreenRecetas({super.key});
   @override
@@ -31,7 +32,14 @@ class ScreenRecetas extends StatelessWidget {
                   // --- Botón de Cancelar ---
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: FloatingActionButtonCancelar(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FloatingActionButtonCancelar(),                  
+                        const SizedBox(width: 10),
+                        FloatingActionButtonGuardar(),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -51,19 +59,4 @@ class ScreenRecetas extends StatelessWidget {
   }
 }
    
-
- //body: Center(
-     // child: Column(
-        //children: [
-        //  Padding(
-          //  padding: const EdgeInsets.all(12.4),
-           // child: MyTextFormFields(),
-        //  ),
-        //  SizedBox(height: 20),
-        //  Padding(
-           // padding: const EdgeInsets.all(12.0),
-          //  child: FloatingActionButtonVender(),
-        //  ),
-      //  ],
-    //  ),
-   // )
+ 
