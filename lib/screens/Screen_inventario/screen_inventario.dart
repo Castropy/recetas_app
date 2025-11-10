@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
+import 'package:recetas_app/widgets/inventario/ingrediente_list_view.dart';
 import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/inventario_form_fields.dart';
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
@@ -13,7 +13,9 @@ class ScreenInventario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Acceder a los notifiers necesarios
     final inventarioNotifier = Provider.of<InventarioFormNotifier>(context, listen: false);
+    // Acceder al notifier de visibilidad del formulario
     final formVisibilityNotifier = Provider.of<FormVisibilityNotifier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
@@ -28,6 +30,7 @@ class ScreenInventario extends StatelessWidget {
         centerTitle: true,
         
       ), 
+      //  Consumidor para reconstruir cuando cambie la visibilidad del formulario
       body: Consumer<FormVisibilityNotifier>(
         builder: (context, notifier, child) {
           return Padding(
@@ -38,46 +41,11 @@ class ScreenInventario extends StatelessWidget {
               children: [
                 // Mostrar/Ocultar los campos condicionalmente
                 if (notifier.isVisible) 
+                // Formulario de Inventario (campos de texto)
                 InventarioFormFields(inventarioNotifier: inventarioNotifier),
-                Expanded(
-  child: StreamBuilder<List<Ingrediente>>(
-    // Accede a la instancia de la DB a través del Provider
-    stream: Provider.of<AppDatabase>(context).select(
-      Provider.of<AppDatabase>(context).ingredientes
-    ).watch(), 
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-        return const Center(child: Text('No hay ingredientes guardados.'));
-      }
-
-      final ingredientes = snapshot.data!;
-      return ListView.builder(
-        itemCount: ingredientes.length,
-        itemBuilder: (context, index) {
-          final ing = ingredientes[index];
-          return ListTile(
-            title: Text(ing.nombre, 
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),),
-            subtitle: Text(
-              'Id: ${ing.id} | Cant: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
-              style: TextStyle(
-                color: const Color.fromARGB(255, 2, 2, 2),
-                fontSize: 16,
                 
-              ),
-              ),
-          );
-        },
-      );
-    },
-  ),
-),
+                // Lista de ingredientes con StreamBuilder
+                const IngredienteListView(),
                 // El resto del contenido de la pantalla iría aquí
                 // ... otros widgets ...
               ],
@@ -102,7 +70,7 @@ class ScreenInventario extends StatelessWidget {
               NotificacionSnackBar.mostrarSnackBar(
                context, 
                 '¡Ingrediente guardado con éxito!',
-        );
+                           );
                           },
                         ),
                

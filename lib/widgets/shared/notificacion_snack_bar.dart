@@ -16,7 +16,7 @@ class NotificacionSnackBar {
         left: 20.0,
         right: 20.0,
       ),
-      backgroundColor: const Color.fromARGB(255, 45, 85, 216), // Usar el color del AppBar
+      backgroundColor: const Color.fromARGB(255, 130, 156, 243), // Usar el color del AppBar
       elevation: 6.0, // Añadir sombra para que resalte
     );
     
