@@ -26,6 +26,12 @@ class $IngredientesTable extends Ingredientes
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 40),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _cantidadMeta =
+      const VerificationMeta('cantidad');
+  @override
+  late final GeneratedColumn<int> cantidad = GeneratedColumn<int>(
+      'cantidad', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _precioMeta = const VerificationMeta('precio');
   @override
   late final GeneratedColumn<double> precio = GeneratedColumn<double>(
@@ -40,7 +46,8 @@ class $IngredientesTable extends Ingredientes
           requiredDuringInsert: false,
           defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns => [id, nombre, precio, fechaCreacion];
+  List<GeneratedColumn> get $columns =>
+      [id, nombre, cantidad, precio, fechaCreacion];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -59,6 +66,12 @@ class $IngredientesTable extends Ingredientes
           nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta));
     } else if (isInserting) {
       context.missing(_nombreMeta);
+    }
+    if (data.containsKey('cantidad')) {
+      context.handle(_cantidadMeta,
+          cantidad.isAcceptableOrUnknown(data['cantidad']!, _cantidadMeta));
+    } else if (isInserting) {
+      context.missing(_cantidadMeta);
     }
     if (data.containsKey('precio')) {
       context.handle(_precioMeta,
@@ -85,6 +98,8 @@ class $IngredientesTable extends Ingredientes
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       nombre: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}nombre'])!,
+      cantidad: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}cantidad'])!,
       precio: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}precio'])!,
       fechaCreacion: attachedDatabase.typeMapping.read(
@@ -101,11 +116,13 @@ class $IngredientesTable extends Ingredientes
 class Ingrediente extends DataClass implements Insertable<Ingrediente> {
   final int id;
   final String nombre;
+  final int cantidad;
   final double precio;
   final DateTime fechaCreacion;
   const Ingrediente(
       {required this.id,
       required this.nombre,
+      required this.cantidad,
       required this.precio,
       required this.fechaCreacion});
   @override
@@ -113,6 +130,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nombre'] = Variable<String>(nombre);
+    map['cantidad'] = Variable<int>(cantidad);
     map['precio'] = Variable<double>(precio);
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     return map;
@@ -122,6 +140,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return IngredientesCompanion(
       id: Value(id),
       nombre: Value(nombre),
+      cantidad: Value(cantidad),
       precio: Value(precio),
       fechaCreacion: Value(fechaCreacion),
     );
@@ -133,6 +152,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return Ingrediente(
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
+      cantidad: serializer.fromJson<int>(json['cantidad']),
       precio: serializer.fromJson<double>(json['precio']),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
     );
@@ -143,16 +163,22 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
+      'cantidad': serializer.toJson<int>(cantidad),
       'precio': serializer.toJson<double>(precio),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
     };
   }
 
   Ingrediente copyWith(
-          {int? id, String? nombre, double? precio, DateTime? fechaCreacion}) =>
+          {int? id,
+          String? nombre,
+          int? cantidad,
+          double? precio,
+          DateTime? fechaCreacion}) =>
       Ingrediente(
         id: id ?? this.id,
         nombre: nombre ?? this.nombre,
+        cantidad: cantidad ?? this.cantidad,
         precio: precio ?? this.precio,
         fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       );
@@ -160,6 +186,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return Ingrediente(
       id: data.id.present ? data.id.value : this.id,
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
       precio: data.precio.present ? data.precio.value : this.precio,
       fechaCreacion: data.fechaCreacion.present
           ? data.fechaCreacion.value
@@ -172,6 +199,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return (StringBuffer('Ingrediente(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
+          ..write('cantidad: $cantidad, ')
           ..write('precio: $precio, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
@@ -179,13 +207,14 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, precio, fechaCreacion);
+  int get hashCode => Object.hash(id, nombre, cantidad, precio, fechaCreacion);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Ingrediente &&
           other.id == this.id &&
           other.nombre == this.nombre &&
+          other.cantidad == this.cantidad &&
           other.precio == this.precio &&
           other.fechaCreacion == this.fechaCreacion);
 }
@@ -193,30 +222,36 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
 class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   final Value<int> id;
   final Value<String> nombre;
+  final Value<int> cantidad;
   final Value<double> precio;
   final Value<DateTime> fechaCreacion;
   const IngredientesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
+    this.cantidad = const Value.absent(),
     this.precio = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   });
   IngredientesCompanion.insert({
     this.id = const Value.absent(),
     required String nombre,
+    required int cantidad,
     required double precio,
     this.fechaCreacion = const Value.absent(),
   })  : nombre = Value(nombre),
+        cantidad = Value(cantidad),
         precio = Value(precio);
   static Insertable<Ingrediente> custom({
     Expression<int>? id,
     Expression<String>? nombre,
+    Expression<int>? cantidad,
     Expression<double>? precio,
     Expression<DateTime>? fechaCreacion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
+      if (cantidad != null) 'cantidad': cantidad,
       if (precio != null) 'precio': precio,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
     });
@@ -225,11 +260,13 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   IngredientesCompanion copyWith(
       {Value<int>? id,
       Value<String>? nombre,
+      Value<int>? cantidad,
       Value<double>? precio,
       Value<DateTime>? fechaCreacion}) {
     return IngredientesCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
+      cantidad: cantidad ?? this.cantidad,
       precio: precio ?? this.precio,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     );
@@ -243,6 +280,9 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
     }
     if (nombre.present) {
       map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (cantidad.present) {
+      map['cantidad'] = Variable<int>(cantidad.value);
     }
     if (precio.present) {
       map['precio'] = Variable<double>(precio.value);
@@ -258,6 +298,7 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
     return (StringBuffer('IngredientesCompanion(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
+          ..write('cantidad: $cantidad, ')
           ..write('precio: $precio, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
@@ -280,6 +321,7 @@ typedef $$IngredientesTableCreateCompanionBuilder = IngredientesCompanion
     Function({
   Value<int> id,
   required String nombre,
+  required int cantidad,
   required double precio,
   Value<DateTime> fechaCreacion,
 });
@@ -287,6 +329,7 @@ typedef $$IngredientesTableUpdateCompanionBuilder = IngredientesCompanion
     Function({
   Value<int> id,
   Value<String> nombre,
+  Value<int> cantidad,
   Value<double> precio,
   Value<DateTime> fechaCreacion,
 });
@@ -305,6 +348,9 @@ class $$IngredientesTableFilterComposer
 
   ColumnFilters<String> get nombre => $composableBuilder(
       column: $table.nombre, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cantidad => $composableBuilder(
+      column: $table.cantidad, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get precio => $composableBuilder(
       column: $table.precio, builder: (column) => ColumnFilters(column));
@@ -328,6 +374,9 @@ class $$IngredientesTableOrderingComposer
   ColumnOrderings<String> get nombre => $composableBuilder(
       column: $table.nombre, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get cantidad => $composableBuilder(
+      column: $table.cantidad, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get precio => $composableBuilder(
       column: $table.precio, builder: (column) => ColumnOrderings(column));
 
@@ -350,6 +399,9 @@ class $$IngredientesTableAnnotationComposer
 
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<int> get cantidad =>
+      $composableBuilder(column: $table.cantidad, builder: (column) => column);
 
   GeneratedColumn<double> get precio =>
       $composableBuilder(column: $table.precio, builder: (column) => column);
@@ -386,24 +438,28 @@ class $$IngredientesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> nombre = const Value.absent(),
+            Value<int> cantidad = const Value.absent(),
             Value<double> precio = const Value.absent(),
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion(
             id: id,
             nombre: nombre,
+            cantidad: cantidad,
             precio: precio,
             fechaCreacion: fechaCreacion,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String nombre,
+            required int cantidad,
             required double precio,
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion.insert(
             id: id,
             nombre: nombre,
+            cantidad: cantidad,
             precio: precio,
             fechaCreacion: fechaCreacion,
           ),

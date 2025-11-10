@@ -4,11 +4,28 @@ import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
+// 1. IMPORTAR LA BASE DE DATOS
+import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta (ej. lib/data/database/database.dart)
 
 void main() {
+  // 2. Asegurarse que los bindings de Flutter estén inicializados
+  //    antes de acceder a los directorios del sistema de archivos.
+  WidgetsFlutterBinding.ensureInitialized(); 
+
+  // 3. Crear una instancia de la base de datos.
+  //    La instancia es una variable global o local para inyección.
+  final AppDatabase database = AppDatabase();
+
   runApp(
-    MultiProvider( // Usar MultiProvider para inyectar múltiples estados
+    MultiProvider(
       providers: [
+        // AÑADIR EL PROVIDER DE LA BASE DE DATOS
+        Provider<AppDatabase>(
+          create: (_) => database, // Inyecta la instancia única
+          dispose: (_, db) => db.close(), // Opcional: Cierra la conexión al desechar
+        ),
+        
+        // Providers existentes
         ChangeNotifierProvider(
           create: (context) => BottomNavBarProvider(),
         ),
@@ -16,17 +33,19 @@ void main() {
           create: (context) => FormVisibilityNotifier(),
         ),
         ChangeNotifierProvider(
-          create: (context) => InventarioFormNotifier(),
+          create: (context) => InventarioFormNotifier(
+            db: context.read<AppDatabase>(),
+          ),
         ),
-        
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 } 
 
 class MyApp extends StatelessWidget {
-   const MyApp({super.key});
+  const MyApp({super.key});
+  // ... (el resto de tu clase MyApp permanece igual)
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,7 +54,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: PantallaPrincipal(),
+      home:  PantallaPrincipal(),
     );
   }
 }

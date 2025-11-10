@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
-import 'package:recetas_app/providers/inventario_form_notifier.dart';
+
 
 
 class FloatingActionButtonCrear extends StatelessWidget {
@@ -63,16 +63,20 @@ class FloatingActionButtonCancelar extends StatelessWidget {
 }
 
 class FloatingActionButtonGuardar extends StatelessWidget {
-  const FloatingActionButtonGuardar({super.key});
+  final VoidCallback onPressed;
+  const FloatingActionButtonGuardar({
+    super.key, 
+    required this.onPressed, // Debe ser requerido
+  });
 
   @override
   Widget build(BuildContext context) {
-    final inventarioNotifier = Provider.of<InventarioFormNotifier>(context, listen: false);
+    
     return FloatingActionButton.extended(
-    onPressed: () {
+    onPressed: onPressed,
     // Lógica al presionar el botón
-    inventarioNotifier.guardarDatos;
-  },
+    
+  
   label: const Text(
     'Guardar',
     style: TextStyle(

@@ -41,7 +41,12 @@ class ScreenRecetas extends StatelessWidget {
                       children: [
                         FloatingActionButtonCancelar(),                  
                         const SizedBox(width: 10),
-                        FloatingActionButtonGuardar(),
+                        FloatingActionButtonGuardar(
+                          onPressed: () {
+                            // Lógica para guardar receta
+                            notifier.hideForm();
+                          },
+                        ),
                       ],
                     ),
                   ),

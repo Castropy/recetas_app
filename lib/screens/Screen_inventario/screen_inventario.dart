@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/text_form_fields.dart';
+
 
 class ScreenInventario extends StatelessWidget {
   const ScreenInventario({super.key});
@@ -40,6 +42,45 @@ class ScreenInventario extends StatelessWidget {
                     hintText: 'precio',
                     prefixIcon: Icons.price_change_sharp,),
                     const SizedBox(height: 10),
+                    Expanded(
+  child: StreamBuilder<List<Ingrediente>>(
+    // Accede a la instancia de la DB a través del Provider
+    stream: Provider.of<AppDatabase>(context).select(
+      Provider.of<AppDatabase>(context).ingredientes
+    ).watch(), 
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return const Center(child: Text('No hay ingredientes guardados.'));
+      }
+
+      final ingredientes = snapshot.data!;
+      return ListView.builder(
+        itemCount: ingredientes.length,
+        itemBuilder: (context, index) {
+          final ing = ingredientes[index];
+          return ListTile(
+            title: Text(ing.nombre, 
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),),
+            subtitle: Text(
+              'Id: ${ing.id} | Cant: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: const Color.fromARGB(255, 2, 2, 2),
+                fontSize: 16,
+                
+              ),
+              ),
+          );
+        },
+      );
+    },
+  ),
+),
 
                   // --- Botón de Cancelar ---
                   Padding(
@@ -50,7 +91,12 @@ class ScreenInventario extends StatelessWidget {
                       children: [
                         FloatingActionButtonCancelar(),                  
                         const SizedBox(width: 10),
-                        FloatingActionButtonGuardar(),
+                        FloatingActionButtonGuardar(
+                          onPressed: () {
+                            inventarioNotifier.guardarDatos();
+                            notifier.hideForm();
+                          },
+                        ),
                       ],
                     ),
                   ),
