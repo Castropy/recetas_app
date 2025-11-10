@@ -5,6 +5,7 @@ import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/inventario_form_fields.dart';
+import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 
 
 class ScreenInventario extends StatelessWidget {
@@ -98,6 +99,10 @@ class ScreenInventario extends StatelessWidget {
             onPressed: () {
                inventarioNotifier.guardarDatos();              
               formVisibilityNotifier.hideForm();
+              NotificacionSnackBar.mostrarSnackBar(
+               context, 
+                '¡Ingrediente guardado con éxito!',
+        );
                           },
                         ),
                
