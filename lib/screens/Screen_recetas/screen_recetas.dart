@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/text_form_fields.dart';
-//import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
-//import 'package:recetas_app/widgets/shared/text_form_fields.dart';
+
 
 // Esta es la pantalla de recetas donde se mostraran las recetas y el formulario para crear nuevas recetas
 class ScreenRecetas extends StatelessWidget {
   const ScreenRecetas({super.key});
   @override
   Widget build(BuildContext context) {
+    //final recetasProvider = context.watch<RecetasProvider>();
     return Scaffold( 
      // El cuerpo reacciona al estado del Provider
       body: Consumer<FormVisibilityNotifier>(
@@ -42,14 +42,18 @@ class ScreenRecetas extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
+                
                 ],
                 // El resto del contenido de la pantalla iría aquí
                 // ... otros widgets ...
               ],
+              
             ),
           );
         },
       ),
+
+      
        
       // --- Floating Action Button (FAB) ---
       floatingActionButton: FloatingActionButtonCrear(),
@@ -59,4 +63,4 @@ class ScreenRecetas extends StatelessWidget {
   }
 }
    
- 
+  

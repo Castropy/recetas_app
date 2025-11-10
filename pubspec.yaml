@@ -34,6 +34,7 @@ dependencies:
   drift: ^2.29.0
   drift_flutter: ^0.2.7
   path_provider: ^2.1.5
+  path : ^1.9.1
     
 
   # The following adds the Cupertino Icons font to your application.

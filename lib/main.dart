@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
+import 'package:recetas_app/providers/recetas_provider.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
 
@@ -13,6 +14,9 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (context) => FormVisibilityNotifier(),
+        ),
+         ChangeNotifierProvider(
+          create: (context) => RecetasProvider(),
         ),
         
       ],
