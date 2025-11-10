@@ -20,12 +20,12 @@ class FloatingActionButtonCrear extends StatelessWidget {
     'Crear Receta', 
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 15,
       ),
     ), // 👈texto
   icon: const Icon(
     Icons.add_card,
-    size: 40,
+    size: 15,
     ),        // 👈 icono
   backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
   foregroundColor: Colors.white,
@@ -49,12 +49,12 @@ class FloatingActionButtonCancelar extends StatelessWidget {
     'Cancelar',
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 14,
     ),
   ), // 👈texto
   icon: const Icon(
     Icons.cancel_sharp,
-    size: 40,
+    size: 14,
     ), 
   backgroundColor: Color.fromARGB(255, 250, 12, 12), // para darle un color
   foregroundColor: Colors.white,
@@ -81,12 +81,12 @@ class FloatingActionButtonGuardar extends StatelessWidget {
     'Guardar',
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 14,
       ),
     ), // 👈texto
   icon: const Icon(
     Icons.save_rounded,
-    size: 40,
+    size: 14,
     ),        // 👈 icono
   backgroundColor: Color.fromARGB(186, 2, 206, 30), // para darle un color
   foregroundColor: Colors.white,
@@ -110,12 +110,12 @@ class FloatingActionButtonAgregar extends StatelessWidget {
     'Agregar', 
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 14,
       ),
     ), // 👈texto
   icon: const Icon(
     Icons.add_card,
-    size: 40,
+    size: 14,
     ),        // 👈 icono
   backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
   foregroundColor: Colors.white,
@@ -137,12 +137,12 @@ class FloatingActionButtonEditar extends StatelessWidget {
     'Editar', 
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 14,
       ),
     ), // 👈texto
   icon: const Icon(
     Icons.edit,
-    size: 40,
+    size: 14,
     ),        // 👈 icono
   backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
   foregroundColor: Colors.white,

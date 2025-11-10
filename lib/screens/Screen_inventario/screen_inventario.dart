@@ -14,6 +14,18 @@ class ScreenInventario extends StatelessWidget {
   Widget build(BuildContext context) {
     final inventarioNotifier = Provider.of<InventarioFormNotifier>(context, listen: false);
     return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: const Text(
+            'Inventario',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 30,
+              color:  Color.fromARGB(255, 45, 85, 216),
+              ),
+            ),
+        ),
+      ), 
       body: Consumer<FormVisibilityNotifier>(
         builder: (context, notifier, child) {
           return Padding(
@@ -42,7 +54,14 @@ class ScreenInventario extends StatelessWidget {
                     hintText: 'precio',
                     prefixIcon: Icons.price_change_sharp,),
                     const SizedBox(height: 10),
-                    Expanded(
+                    
+
+                  // --- Botón de Cancelar ---
+                  
+                  const SizedBox(height: 10),
+                
+                ],
+                Expanded(
   child: StreamBuilder<List<Ingrediente>>(
     // Accede a la instancia de la DB a través del Provider
     stream: Provider.of<AppDatabase>(context).select(
@@ -81,28 +100,6 @@ class ScreenInventario extends StatelessWidget {
     },
   ),
 ),
-
-                  // --- Botón de Cancelar ---
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FloatingActionButtonCancelar(),                  
-                        const SizedBox(width: 10),
-                        FloatingActionButtonGuardar(
-                          onPressed: () {
-                            inventarioNotifier.guardarDatos();
-                            notifier.hideForm();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                
-                ],
                 // El resto del contenido de la pantalla iría aquí
                 // ... otros widgets ...
               ],
@@ -116,7 +113,18 @@ class ScreenInventario extends StatelessWidget {
         children: [
           FloatingActionButtonAgregar(),
           const SizedBox(height: 10),
-          FloatingActionButtonEditar()
+          FloatingActionButtonEditar(),
+          const SizedBox(height: 10),
+          FloatingActionButtonCancelar(),                  
+          const SizedBox(height: 10),
+          FloatingActionButtonGuardar(
+            onPressed: () {
+               inventarioNotifier.guardarDatos();
+               final formVisibilityNotifier = Provider.of<FormVisibilityNotifier>(context, listen: false);
+              formVisibilityNotifier.hideForm();
+                          },
+                        ),
+               
         ],
       ),
       
