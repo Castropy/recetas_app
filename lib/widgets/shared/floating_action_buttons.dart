@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
+import 'package:recetas_app/providers/inventario_form_notifier.dart';
 
 
 class FloatingActionButtonCrear extends StatelessWidget {
@@ -66,9 +67,11 @@ class FloatingActionButtonGuardar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inventarioNotifier = Provider.of<InventarioFormNotifier>(context, listen: false);
     return FloatingActionButton.extended(
     onPressed: () {
     // Lógica al presionar el botón
+    inventarioNotifier.guardarDatos;
   },
   label: const Text(
     'Guardar',
@@ -86,3 +89,60 @@ class FloatingActionButtonGuardar extends StatelessWidget {
     );
   }
 }
+
+class FloatingActionButtonAgregar extends StatelessWidget {
+  const FloatingActionButtonAgregar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final formNotifier = Provider.of<FormVisibilityNotifier>(context, listen: false);
+    return FloatingActionButton.extended(
+    onPressed: () {
+    // Lógica al presionar el botón
+   return formNotifier.showForm(); 
+   
+  },
+  label: const Text(
+    'Agregar', 
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 30,
+      ),
+    ), // 👈texto
+  icon: const Icon(
+    Icons.add_card,
+    size: 40,
+    ),        // 👈 icono
+  backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
+  foregroundColor: Colors.white,
+
+    );
+  }
+} 
+
+class FloatingActionButtonEditar extends StatelessWidget {
+  const FloatingActionButtonEditar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton.extended(
+    onPressed: () {
+    // Lógica al presionar el botón
+  },
+  label: const Text(
+    'Editar', 
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 30,
+      ),
+    ), // 👈texto
+  icon: const Icon(
+    Icons.edit,
+    size: 40,
+    ),        // 👈 icono
+  backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
+  foregroundColor: Colors.white,
+
+    );
+  }
+} 

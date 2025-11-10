@@ -24,10 +24,14 @@ class ScreenRecetas extends StatelessWidget {
                 // Mostrar/Ocultar los campos condicionalmente
                 if (notifier.isVisible) ...[
                   // --- Campos de Formulario ---
-                  const  MyTextFormFields(),
+                   const  CustomTextFormField(
+                    hintText: 'Nombre',
+                    prefixIcon: Icons.food_bank_rounded,),
                   const SizedBox(height: 10),
-                  const  MyTextFormFields2(),
-                  const SizedBox(height: 20),
+                  const  CustomTextFormField(
+                    hintText: 'ejemplo',
+                    prefixIcon: Icons.emoji_food_beverage,),
+                 const SizedBox(height: 20),
 
                   // --- Botón de Cancelar ---
                   Padding(
@@ -56,11 +60,11 @@ class ScreenRecetas extends StatelessWidget {
       
        
       // --- Floating Action Button (FAB) ---
-      floatingActionButton: FloatingActionButtonCrear(),
+      floatingActionButton: FloatingActionButtonCrear(), 
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
       
     );
   }
-}
+} 
    
   

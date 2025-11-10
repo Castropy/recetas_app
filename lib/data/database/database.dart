@@ -4,7 +4,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-LazyDatabase _openConnection() {
+LazyDatabase openConnection() { //Recordatorio colocar _ antes de OpenConection
   return LazyDatabase(() async {
     // Obtiene el directorio para almacenar los archivos de la aplicación
     final dbFolder = await getApplicationDocumentsDirectory();
