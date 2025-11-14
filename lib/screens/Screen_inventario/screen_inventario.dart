@@ -6,8 +6,6 @@ import 'package:recetas_app/widgets/inventario/ingrediente_list_view.dart';
 import 'package:recetas_app/widgets/inventario/inventario_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/inventario_form_fields.dart';
 
-
-
 class ScreenInventario extends StatelessWidget {
   const ScreenInventario({super.key});
 
@@ -27,8 +25,7 @@ class ScreenInventario extends StatelessWidget {
               color:  Color.fromARGB(255, 45, 85, 216),
               ),
             ),
-        centerTitle: true,
-        
+        centerTitle: true,  
       ), 
       //  Consumidor para reconstruir cuando cambie la visibilidad del formulario
       body: Consumer<FormVisibilityNotifier>(
@@ -54,6 +51,7 @@ class ScreenInventario extends StatelessWidget {
           );
         },
       ),
+      // Botones de acción encapsulados en un widget separado
       floatingActionButton: InventarioActionButtons(
         inventarioNotifier: inventarioNotifier,
         formVisibilityNotifier: formVisibilityNotifier,

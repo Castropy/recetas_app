@@ -46,4 +46,6 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deleteIngrediente(int id) {
     return (delete(ingredientes)..where((tbl) => tbl.id.equals(id))).go();
   } 
+
+  
 }

@@ -1,33 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recetas_app/providers/botton_nav_provider.dart';
 import 'package:recetas_app/screens/Screen_inventario/screen_inventario.dart';
-import 'package:recetas_app/screens/Screen_recetas/Screen_recetas.dart';
+import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
 import 'package:recetas_app/screens/Screen_reporte/screen_reporte.dart';
 import 'package:recetas_app/screens/Screen_vender/screen_vender.dart';
-import 'package:recetas_app/providers/botton_nav_provider.dart';
 
-class PantallaPrincipal extends StatelessWidget {
-   PantallaPrincipal({super.key}); 
+class CustomBottonNavBar extends StatelessWidget {
+  const CustomBottonNavBar({super.key});
 
-   final List<Widget> _screens = [ScreenRecetas(), ScreenVender(), ScreenInventario(), ScreenReporte()];
- 
   @override
   Widget build(BuildContext context) {
     final navBarProvider = context.watch<BottomNavBarProvider>();
+    final List<Widget> screens = [ScreenRecetas(), ScreenVender(), ScreenInventario(), ScreenReporte()];
+ 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Recetas App',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 30,
-            color:  Color.fromARGB(255, 45, 85, 216),
-            ),
-          ),
-      ), 
-      // 1. Mostrar la pantalla correspondiente al índice actual
-      body: _screens[navBarProvider.currentIndex], 
-      
+
+       // 1. Mostrar la pantalla correspondiente al índice actual
+      body: screens[navBarProvider.currentIndex], 
+
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: const Color.fromARGB(255, 247, 247, 248),
         unselectedItemColor: const Color.fromARGB(214, 160, 168, 177),
@@ -59,7 +50,7 @@ class PantallaPrincipal extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.inventory_sharp), label: 'Inventario'),
           BottomNavigationBarItem(icon: Icon(Icons.file_present), label: 'Reportes'),
         ],
-      ),
+      ), 
     );
   }
-} 
+}

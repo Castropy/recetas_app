@@ -150,3 +150,31 @@ class FloatingActionButtonEditar extends StatelessWidget {
     );
   }
 } 
+
+class FloatingActionButtonEliminar extends StatelessWidget {
+  const FloatingActionButtonEliminar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton.extended(
+    onPressed: () {
+    // Lógica al presionar el botón
+  },
+  label: const Text(
+    'Eliminar', 
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      ),
+    ), // 👈texto
+  icon: const Icon(
+    Icons.edit,
+    size: 14,
+    ),        // 👈 icono
+  backgroundColor: Color.fromARGB(255, 250, 12, 12), // para darle un color
+  foregroundColor: Colors.white,
+
+    );
+  }
+} 
+
