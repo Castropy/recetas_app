@@ -19,14 +19,14 @@ class InventarioActionButtons extends StatelessWidget {
   // --- Grupo 1: Agregar y Editar (Modo Vista) ---
   Widget _buildViewModeButtons(BuildContext context) {
     // Usamos una clave para que AnimatedSwitcher sepa que este es un hijo distinto.
-    return Column(
+    return Row(
       key: const ValueKey('viewMode'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // NOTA: FloatingActionButtonAgregar debe llamar internamente a formVisibilityNotifier.showForm()
         FloatingActionButtonAgregar(), 
-        const SizedBox(height: 10),
+        const SizedBox(width: 6),
         // NOTA: FloatingActionButtonEditar debe llamar internamente a formVisibilityNotifier.showForm()
         FloatingActionButtonEditar(),
       ],
@@ -36,14 +36,14 @@ class InventarioActionButtons extends StatelessWidget {
   // --- Grupo 2: Guardar y Cancelar (Modo Edición) ---
   Widget _buildEditModeButtons(BuildContext context) {
     // Usamos una clave para que AnimatedSwitcher sepa que este es un hijo distinto.
-    return Column(
+    return Row(
       key: const ValueKey('editMode'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // El botón Cancelar debe llamar internamente a formVisibilityNotifier.hideForm()
         FloatingActionButtonCancelar(), 
-        const SizedBox(height: 10),
+        const SizedBox(width: 6),
         FloatingActionButtonGuardar(
           onPressed: () {
             // Lógica de guardado centralizada

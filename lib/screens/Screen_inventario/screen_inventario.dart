@@ -41,21 +41,27 @@ class ScreenInventario extends StatelessWidget {
                 // Formulario de Inventario (campos de texto)
                 InventarioFormFields(inventarioNotifier: inventarioNotifier),
                 
+                 Padding(
+                   padding: const EdgeInsets.all(0.0),
+                   child: InventarioActionButtons(
+                    inventarioNotifier: inventarioNotifier,
+                    formVisibilityNotifier: formVisibilityNotifier,
+                      ),
+                 ),
                 // Lista de ingredientes con StreamBuilder
                 const IngredienteListView(),
                 // El resto del contenido de la pantalla iría aquí
                 // ... otros widgets ...
+                
               ],
+              
               
             ),
           );
         },
       ),
       // Botones de acción encapsulados en un widget separado
-      floatingActionButton: InventarioActionButtons(
-        inventarioNotifier: inventarioNotifier,
-        formVisibilityNotifier: formVisibilityNotifier,
-      ),
+      
       
     );
   }

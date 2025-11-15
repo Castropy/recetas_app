@@ -61,7 +61,7 @@ class IngredienteListView extends StatelessWidget {
                 title: Text(
                   ing.nombre, 
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Color.fromARGB(255, 248, 246, 246),
                   ),
@@ -70,7 +70,7 @@ class IngredienteListView extends StatelessWidget {
                   'Id: ${ing.id} | Stock: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
                   style: const TextStyle(
                     color: Color.fromARGB(255, 248, 246, 246),
-                    fontSize: 16,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
