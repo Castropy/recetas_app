@@ -6,6 +6,8 @@ class FormVisibilityNotifier extends ChangeNotifier {
 
   bool get isVisible => _isVisible;
 
+  
+
   // Método para mostrar los campos
   void showForm() {
     _isVisible = true;
