@@ -51,19 +51,27 @@ class IngredienteListView extends StatelessWidget {
             itemCount: ingredientes.length,
             itemBuilder: (context, index) {
               final ing = ingredientes[index];
-              return ListTile(
+              return Card(
+                color: const Color.fromARGB(255, 23, 69, 150),
+                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                shape: RoundedRectangleBorder(
+                 borderRadius: BorderRadius.circular(15.0),                 
+                    ),   
+                child: ListTile(
                 title: Text(
                   ing.nombre, 
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 248, 246, 246),
                   ),
                 ),
                 subtitle: Text(
-                  'Id: ${ing.id} | Cant: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
+                  'Id: ${ing.id} | Stock: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    color: Color.fromARGB(255, 2, 2, 2),
+                    color: Color.fromARGB(255, 248, 246, 246),
                     fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 // --- CAMBIO CLAVE: Botón de eliminación en el trailing ---
@@ -72,7 +80,7 @@ class IngredienteListView extends StatelessWidget {
                   onDelete: deleteIngrediente,
                 ),
                 // --------------------------------------------------------
-              );
+              )); 
             },
           );
         },
