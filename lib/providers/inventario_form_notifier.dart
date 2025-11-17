@@ -1,64 +1,93 @@
 import 'package:flutter/material.dart';
-import '../data/database/database.dart'; // <--- Asegúrate que esta ruta sea correcta
+import '../data/database/database.dart'; 
 
 class InventarioFormNotifier extends ChangeNotifier {
-  // 1. DEPENDENCIA: Requiere la instancia de AppDatabase
   final AppDatabase db;
   InventarioFormNotifier({required this.db});
 
-  // 2. PROPIEDADES DEL FORMULARIO
+  int? _editingIngredienteId;
+  int? get editingIngredienteId => _editingIngredienteId;
+
   String nombre = '';
   String cantidad = '';
   String precio = '';
 
-  // 3. MÉTODOS DE ACTUALIZACIÓN (onChanged)
   void updateNombre(String value) {
     nombre = value;
+    notifyListeners(); 
   }
 
   void updateCantidad(String value) {
-    cantidad = value;
+    cantidad = value.replaceAll(RegExp(r'[^\d]'), '');
+    notifyListeners();
   }
 
   void updatePrecio(String value) {
-    precio = value;
+    precio = value.replaceAll(RegExp(r'[^\d\.]'), '');
+    notifyListeners();
   }
 
-  // 4. FUNCIÓN CLAVE: Guardar los datos en Drift
-  void guardarDatos() async {
-    // Conversión y validación de tipos
-    final String nombreItem = nombre.trim();
-    final int? cant = int.tryParse(cantidad.trim());
-    final double? prec = double.tryParse(precio.trim());
-
-    // Validación: Nombre no vacío, Cantidad y Precio son números positivos
-    if (nombreItem.isEmpty || cant == null || prec == null || cant <= 0 || prec <= 0) {
-      // Nota: En una app real, aquí se emitiría un error visible a la UI.
-      debugPrint('Error de validación: Revise los campos.');
-      return;
-    }
-
-    // 5. Crear el objeto Companion de Drift con los tres campos
-    final nuevoIngrediente = IngredientesCompanion.insert(
-      nombre: nombreItem,
-      cantidad: cant, // Se inserta como int
-      precio: prec,    // Se inserta como double
-    );
-
-    // 6. Ejecutar la operación de inserción en la DB
-    try {
-      await db.insertIngrediente(nuevoIngrediente);
-      // Opcional: Mostrar un mensaje de éxito
-      debugPrint('Ingrediente "$nombreItem" guardado con éxito!');
-    } catch (e) {
-      debugPrint('Error al guardar ingrediente en DB: $e');
-      // Manejo de errores de la base de datos (ej. restricción única)
-    }
-
-    // 7. Limpiar el formulario y notificar a los listeners
+  void loadIngredienteForEditing(Ingrediente ingrediente) {
+    _editingIngredienteId = ingrediente.id;
+    nombre = ingrediente.nombre;
+    cantidad = ingrediente.cantidad.toString(); 
+    precio = ingrediente.precio.toString();
+    notifyListeners();
+  }
+  
+  void clearForm() {
+    _editingIngredienteId = null;
     nombre = '';
     cantidad = '';
     precio = '';
     notifyListeners();
+  }
+
+  void guardarDatos() async {
+    final String nombreItem = nombre.trim();
+    final int? cant = int.tryParse(cantidad.trim());
+    final double? prec = double.tryParse(precio.trim());
+
+    if (nombreItem.isEmpty || cant == null || prec == null || cant <= 0 || prec <= 0) {
+      debugPrint('Error de validación: Revise los campos.');
+      return;
+    }
+
+    try {
+      if (_editingIngredienteId != null) {
+        // --- MODO EDICIÓN ---
+        final idToUpdate = _editingIngredienteId!;
+        
+        // NOTA IMPORTANTE: Creamos un objeto Ingrediente completo, NO un Companion, 
+        // para que coincida con la firma 'updateIngrediente(Ingrediente)' de tu DB.
+        final ingredienteToUpdate = Ingrediente(
+          id: idToUpdate,
+          nombre: nombreItem,
+          cantidad: cant,
+          precio: prec,
+          // El campo fechaCreacion es obligatorio, usamos la fecha actual como placeholder/reemplazo.
+          fechaCreacion: DateTime.now(), 
+        );
+
+        // NOTA IMPORTANTE: La llamada es con un solo argumento (Ingrediente)
+        await db.updateIngrediente(ingredienteToUpdate); 
+        debugPrint('Ingrediente "$nombreItem" actualizado (ID: $idToUpdate) con éxito!');
+        
+      } else {
+        // --- MODO INSERCIÓN ---
+        final ingredienteCompanion = IngredientesCompanion.insert(
+          nombre: nombreItem,
+          cantidad: cant,
+          precio: prec,
+        );
+        await db.insertIngrediente(ingredienteCompanion);
+        debugPrint('Ingrediente "$nombreItem" guardado con éxito!');
+      }
+      
+    } catch (e) {
+      debugPrint('Error al guardar/actualizar ingrediente en DB: $e');
+    }
+
+    clearForm();
   }
 }

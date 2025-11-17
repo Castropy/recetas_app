@@ -35,30 +35,31 @@ class FloatingActionButtonCrear extends StatelessWidget {
 } 
 
 class FloatingActionButtonCancelar extends StatelessWidget {
-  const FloatingActionButtonCancelar({super.key});
+  // 💡 Ahora requiere una función para manejar la lógica de limpieza
+  final VoidCallback onPressed; 
+  const FloatingActionButtonCancelar({
+    required this.onPressed,
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
-    final formNotifier = Provider.of<FormVisibilityNotifier>(context, listen: false);
     return FloatingActionButton.extended(
-    onPressed: () {
-    // Lógica al presionar el botón
-    return formNotifier.hideForm(); 
-  },
-  label: const Text(
-    'Cancelar',
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
+     onPressed: onPressed,
+     label: const Text(
+     'Cancelar',
+     style: TextStyle(
+     fontWeight: FontWeight.bold,
+     fontSize: 14,
     ),
-  ), // 👈texto
-  icon: const Icon(
+   ), // 👈texto
+   icon: const Icon(
     Icons.cancel_sharp,
     size: 14,
-    ), 
-  backgroundColor: Color.fromARGB(255, 250, 12, 12), // para darle un color
-  foregroundColor: Colors.white,
-    );
+   ), 
+   backgroundColor: Color.fromARGB(255, 250, 12, 12), // para darle un color
+   foregroundColor: Colors.white,
+  );
   }
 }
 

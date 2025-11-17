@@ -39,7 +39,12 @@ class ScreenRecetas extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        FloatingActionButtonCancelar(),                  
+                        FloatingActionButtonCancelar(
+                          onPressed: () {
+                            // Lógica para cancelar la creación de receta
+                            notifier.hideForm();
+                          },
+                        ),                  
                         const SizedBox(width: 10),
                         FloatingActionButtonGuardar(
                           onPressed: () {
