@@ -35,8 +35,7 @@ class IngredienteListView extends StatelessWidget {
       child: StreamBuilder<List<Ingrediente>>(
         // Accede a la instancia de la DB a través del Provider
         stream: Provider.of<AppDatabase>(context).select(
-          Provider.of<AppDatabase>(context).ingredientes
-        ).watch(), 
+          Provider.of<AppDatabase>(context).ingredientes).watch(), 
         
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
