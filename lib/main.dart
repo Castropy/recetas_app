@@ -4,6 +4,7 @@ import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/receta_form_notifier.dart';
 import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
+import 'package:recetas_app/screens/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
 import 'package:recetas_app/screens/receta_form_screen.dart';
@@ -71,7 +72,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => PantallaPrincipal(), // Tu pantalla principal
         'recetas': (context) => const ScreenRecetas(), // Ruta de listado
-        RecetaFormScreen.routeName: (context) => const RecetaFormScreen(), // NUEVA RUTA DEL FORMULARIO
+        RecetaFormScreen.routeName: (context) => const RecetaFormScreen(),
+        DetalleRecetaScreen.routeName: (context) => const DetalleRecetaScreen(), // NUEVA RUTA DEL FORMULARIO
       },
     );  
   }

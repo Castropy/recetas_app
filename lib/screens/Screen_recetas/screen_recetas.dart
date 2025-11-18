@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
+import 'package:recetas_app/screens/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/receta_form_screen.dart';
 //import 'package:recetas_app/widgets/shared/custom_app_bar.dart';
 
@@ -62,14 +63,18 @@ class ScreenRecetas extends StatelessWidget {
                         icon: const Icon(Icons.visibility),
                         color: Colors.blueGrey,
                         onPressed: () {
-                          
+                           Navigator.pushNamed(
+                            context, 
+                            DetalleRecetaScreen.routeName, 
+                            arguments: receta.id // Pasamos el ID de la receta
+                          );
                           // Navigator.pushNamed(context, DetalleRecetaScreen.routeName, arguments: receta.id);
                         },
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
-                          
+                         
                           // db.deleteReceta(receta.id);
                         },
                       ),
