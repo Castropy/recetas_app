@@ -65,18 +65,27 @@ class AppDatabase extends _$AppDatabase {
     return (delete(ingredientes)..where((tbl) => tbl.id.equals(id))).go();
   } 
   
-  Future<int> createReceta(RecetasCompanion receta, List<RecetaIngredientesCompanion> ingredientesReceta) async {
-    return transaction(() async {
-      // 1. Insertar la Receta principal
-      final recetaId = await into(recetas).insert(receta);
-      
-      // 2. Insertar los ingredientes asociados a esa Receta (usando el ID recién creado)
-      final itemsToInsert = ingredientesReceta.map((i) => 
-        i.copyWith(recetaId: Value(recetaId))
-      ).toList();
+  Future<void> saveRecetaTransaction(
+      RecetasCompanion receta, 
+      List<RecetaIngredientesCompanion> ingredientes) async {
+    
+    // Inicia una transacción
+    await transaction(() async {
+      // 1. Insertar la Receta principal. Esto devuelve el ID autogenerado (INT).
+      final int recetaId = await into(recetas).insert(receta);
 
+      // 2. Preparar los compañeros de Ingredientes para la inserción.
+      final List<RecetaIngredientesCompanion> listToInsert = [];
+
+      for (var item in ingredientes) {
+        // 🟢 CLAVE: Creamos una COPIA del Companion, inyectando el ID real de la receta.
+        final RecetaIngredientesCompanion updatedCompanion = item.copyWith(
+          recetaId: Value(recetaId), // Inyectamos el ID de la receta que acabamos de crear
+        );
+        listToInsert.add(updatedCompanion);
+      }
       await batch((batch) {
-        batch.insertAll(recetaIngredientes, itemsToInsert);
+        batch.insertAll(recetaIngredientes, listToInsert);
       });
       
       return recetaId;

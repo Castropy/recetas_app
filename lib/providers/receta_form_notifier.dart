@@ -93,7 +93,7 @@ class RecetaFormNotifier extends ChangeNotifier {
      }).toList();
 
       // 3. Ejecutar la transacción atómica para guardar ambos sets de datos
-      await db.createReceta(recetaCompanion, ingredientesCompanion);
+      await db.saveRecetaTransaction(recetaCompanion, ingredientesCompanion);
       
       // 4. Limpiar y notificar al usuario
       final savedName = nombreReceta;
