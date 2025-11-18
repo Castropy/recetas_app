@@ -1,80 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recetas_app/providers/form_visibility_notifier.dart';
-import 'package:recetas_app/widgets/shared/floating_action_buttons.dart';
-import 'package:recetas_app/widgets/shared/text_form_fields.dart';
+import 'package:recetas_app/data/database/database.dart';
+import 'package:recetas_app/screens/receta_form_screen.dart';
+//import 'package:recetas_app/widgets/shared/custom_app_bar.dart';
 
-
-// Esta es la pantalla de recetas donde se mostraran las recetas y el formulario para crear nuevas recetas
 class ScreenRecetas extends StatelessWidget {
   const ScreenRecetas({super.key});
+
   @override
   Widget build(BuildContext context) {
-    //final recetasProvider = context.watch<RecetasProvider>();
-    return Scaffold( 
-     // El cuerpo reacciona al estado del Provider
-      body: Consumer<FormVisibilityNotifier>(
-        builder: (context, notifier, child) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Mostrar/Ocultar los campos condicionalmente
-                if (notifier.isVisible) ...[
-                  // --- Campos de Formulario ---
-                   const  CustomTextFormField(
-                    hintText: 'Nombre',
-                    prefixIcon: Icons.food_bank_rounded,),
-                  const SizedBox(height: 10),
-                  const  CustomTextFormField(
-                    hintText: 'ejemplo',
-                    prefixIcon: Icons.emoji_food_beverage,),
-                 const SizedBox(height: 20),
+    final db = Provider.of<AppDatabase>(context);
+    final theme = Theme.of(context);
 
-                  // --- Botón de Cancelar ---
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FloatingActionButtonCancelar(
-                          onPressed: () {
-                            // Lógica para cancelar la creación de receta
-                            notifier.hideForm();
-                          },
-                        ),                  
-                        const SizedBox(width: 10),
-                        FloatingActionButtonGuardar(
-                          onPressed: () {
-                            // Lógica para guardar receta
-                            notifier.hideForm();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+    return Scaffold(
+      
+      // Escucha en tiempo real todos los cambios en la tabla de recetas
+      body: StreamBuilder<List<Receta>>(
+        stream: db.watchAllRecetas(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.menu_book, size: 80, color: theme.colorScheme.primary),
                   const SizedBox(height: 10),
-                
+                  const Text('No hay recetas aún.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  const Text('Presiona "+" para añadir una nueva receta.', style: TextStyle(color: Colors.grey)),
                 ],
-                // El resto del contenido de la pantalla iría aquí
-                // ... otros widgets ...
-              ],
-              
-            ),
+              ),
+            );
+          }
+
+          final recetas = snapshot.data!;
+          return ListView.builder(
+            itemCount: recetas.length,
+            itemBuilder: (context, index) {
+              final receta = recetas[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                elevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.primary,
+                    child: Text('${index + 1}', style: const TextStyle(color: Colors.white)),
+                  ),
+                  title: Text(
+                    receta.nombre,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  // Muestra el costo total calculado al guardar
+                  subtitle: Text('Costo de Producción: \$${receta.costoTotal.toStringAsFixed(2)}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.visibility),
+                        color: Colors.blueGrey,
+                        onPressed: () {
+                          
+                          // Navigator.pushNamed(context, DetalleRecetaScreen.routeName, arguments: receta.id);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          
+                          // db.deleteReceta(receta.id);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
-
-      
-       
-      // --- Floating Action Button (FAB) ---
-      floatingActionButton: FloatingActionButtonCrear(), 
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
-      
+      // Botón para navegar al formulario de creación
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'addRecetaButton',
+        backgroundColor: theme.colorScheme.secondary,
+        onPressed: () {
+          // Navegar al formulario de creación de recetas
+          Navigator.pushNamed(context, RecetaFormScreen.routeName);
+        },
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
-} 
+}
     
   

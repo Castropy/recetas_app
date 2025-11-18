@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
+import 'package:recetas_app/providers/receta_form_notifier.dart';
+import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
+import 'package:recetas_app/screens/receta_form_screen.dart';
 // 1. IMPORTAR LA BASE DE DATOS
 import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta (ej. lib/data/database/database.dart)
 
@@ -37,6 +40,14 @@ void main() {
             db: context.read<AppDatabase>(),
           ),
         ),
+
+        ChangeNotifierProvider(
+          create: (context) => RecetaFormNotifier(
+            db: context.read<AppDatabase>(),
+          ),
+        ),
+
+        
       ],
       child: const MyApp(),
     ),
@@ -54,7 +65,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:  PantallaPrincipal(),
-    );
+      
+
+      initialRoute: '/',
+      routes: {
+        '/': (context) => PantallaPrincipal(), // Tu pantalla principal
+        'recetas': (context) => const ScreenRecetas(), // Ruta de listado
+        RecetaFormScreen.routeName: (context) => const RecetaFormScreen(), // NUEVA RUTA DEL FORMULARIO
+      },
+    );  
   }
+  
 }
