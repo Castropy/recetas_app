@@ -76,5 +76,5 @@ class ScreenRecetas extends StatelessWidget {
     );
   }
 } 
-   
+    
   

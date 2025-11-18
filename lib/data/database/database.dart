@@ -24,9 +24,27 @@ class Ingredientes extends Table {
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
 }
 
+class Recetas extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get nombre => text().withLength(min: 1, max: 40)();
+  RealColumn get costoTotal => real()();
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+}
+//Tabla de union entre recetas e ingredientes (relacion muchos a muchos)
+class RecetaIngredientes extends Table {
+  // Clave de la tabla recetas
+  IntColumn get recetaId => integer().references(Recetas, #id)();
+  // Clave de la tabla ingredientes
+  IntColumn get ingredienteId => integer().references(Ingredientes, #id)();
+  // Cantidad de este ingrediente necesaria para UNA unidad de la receta
+  RealColumn get cantidadNecesaria => real()();
+  @override
+  Set<Column> get primaryKey => {recetaId, ingredienteId};
+  
+}
  
 
-@DriftDatabase(tables: [Ingredientes])
+@DriftDatabase(tables: [Ingredientes, Recetas, RecetaIngredientes])
 class AppDatabase extends _$AppDatabase { 
   AppDatabase() : super(_openConnection());
   @override
@@ -46,6 +64,30 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deleteIngrediente(int id) {
     return (delete(ingredientes)..where((tbl) => tbl.id.equals(id))).go();
   } 
+  
+  Future<int> createReceta(RecetasCompanion receta, List<RecetaIngredientesCompanion> ingredientesReceta) async {
+    return transaction(() async {
+      // 1. Insertar la Receta principal
+      final recetaId = await into(recetas).insert(receta);
+      
+      // 2. Insertar los ingredientes asociados a esa Receta (usando el ID recién creado)
+      final itemsToInsert = ingredientesReceta.map((i) => 
+        i.copyWith(recetaId: Value(recetaId))
+      ).toList();
+
+      await batch((batch) {
+        batch.insertAll(recetaIngredientes, itemsToInsert);
+      });
+      
+      return recetaId;
+    });
+  }
+
+  // Obtener todas las recetas (para listar en ScreenRecetas)
+  Stream<List<Receta>> watchAllRecetas() => select(recetas).watch();
+
+  // Stream para la lista de Ingredientes de Inventario (usado en el selector de recetas)
+  Stream<List<Ingrediente>> watchInventarioIngredientes() => select(ingredientes).watch();
 
   
-}
+} 
