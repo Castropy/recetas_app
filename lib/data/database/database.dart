@@ -154,5 +154,11 @@ Future<void> updateRecetaTransaction(
     });
   }
 
+  Future<List<Ingrediente>> getIngredientesByIds(List<int> ids) {
+  // Utilizamos la cláusula .isIn() de Drift para seleccionar todos los ingredientes
+  // cuyos IDs están contenidos en la lista 'ids' proporcionada.
+  return (select(ingredientes)..where((tbl) => tbl.id.isIn(ids))).get();
+}
+
   
 } 

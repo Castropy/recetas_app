@@ -111,12 +111,12 @@ class FloatingActionButtonAgregar extends StatelessWidget {
     'Agregar', 
     style: TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 14,
+      fontSize: 10,
       ),
     ), // 👈texto
   icon: const Icon(
     Icons.add_card,
-    size: 14,
+    size: 10,
     ),        // 👈 icono
   backgroundColor: Color.fromARGB(255, 45, 85, 216), // para darle un color
   foregroundColor: Colors.white,

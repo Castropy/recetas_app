@@ -42,7 +42,7 @@ class DetalleRecetaScreen extends StatelessWidget {
           final Receta receta = entry.key;
           final List<RecetaIngrediente> ingredientes = entry.value;
 
-          return _RecetaDetailBody(receta: receta, ingredientes: ingredientes, db: db);
+          return _RecetaDetailBody(receta: receta, ingredientesReceta: ingredientes, db: db);
         },
       ),
     );
@@ -51,12 +51,13 @@ class DetalleRecetaScreen extends StatelessWidget {
 
 class _RecetaDetailBody extends StatelessWidget {
   final Receta receta;
-  final List<RecetaIngrediente> ingredientes;
+  // Renombramos a 'ingredientesReceta' para mayor claridad
+  final List<RecetaIngrediente> ingredientesReceta; 
   final AppDatabase db;
 
   const _RecetaDetailBody({
     required this.receta,
-    required this.ingredientes,
+    required this.ingredientesReceta,
     required this.db,
   });
 
@@ -64,60 +65,72 @@ class _RecetaDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título de la Receta
-          Text(
-            receta.nombre,
-            style: theme.textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
+    // Paso 1: Obtener todos los IDs de ingredientes necesarios
+    final List<int> ids = ingredientesReceta.map((ri) => ri.ingredienteId).toList();
 
-          // Costo Total
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // 🟢 Paso 2: Usar FutureBuilder para buscar TODOS los objetos Ingrediente (Nombres)
+    return FutureBuilder<List<Ingrediente>>(
+      future: db.getIngredientesByIds(ids), 
+      builder: (context, snapshotIngredientes) {
+        // Mantenemos la lógica de carga para esta segunda consulta
+        if (snapshotIngredientes.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator()); 
+        }
+
+        // Convertir la lista de Ingredientes en un Map para búsqueda O(1) por ID
+        final Map<int, Ingrediente> ingredienteMap = {
+          for (var item in snapshotIngredientes.data ?? []) item.id: item
+        };
+
+        // 🟢 Paso 3: Renderizado de la UI (Ahora todos los datos están disponibles)
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Costo de Producción:', style: TextStyle(fontSize: 16)),
+              // Título de la Receta
               Text(
-                '\$${receta.costoTotal.toStringAsFixed(2)}',
-                style: theme.textTheme.titleLarge!.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                receta.nombre,
+                style: theme.textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          const Divider(height: 30),
+              const SizedBox(height: 8),
 
-          // Sección de Ingredientes
-          Text(
-            'Ingredientes Utilizados (${ingredientes.length}):',
-            style: theme.textTheme.titleLarge,
-          ),
-          const SizedBox(height: 10),
+              // Costo Total
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Costo de Producción:', style: TextStyle(fontSize: 16)),
+                  Text(
+                    '\$${receta.costoTotal.toStringAsFixed(2)}',
+                    style: theme.textTheme.titleLarge!.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 30),
 
-          // Lista de Ingredientes
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: ingredientes.length,
-            itemBuilder: (context, index) {
-              final RecetaIngrediente ri = ingredientes[index];
-              
-              // Para mostrar el nombre del ingrediente, necesitamos buscarlo por su ID.
-              // La tabla RecetaIngredientes solo guarda el ID y la cantidad.
-              // Usaremos otro FutureBuilder para obtener el nombre de la tabla Ingredientes
-              return FutureBuilder<Ingrediente?>(
-                future: db.getIngredienteById(ri.ingredienteId), // Necesitas crear este helper
-                builder: (context, ingredienteSnapshot) {
-                  final String nombre = ingredienteSnapshot.data?.nombre ?? 'Ingrediente Desconocido';
+              // Sección de Ingredientes
+              Text(
+                'Ingredientes Utilizados (${ingredientesReceta.length}):',
+                style: theme.textTheme.titleLarge,
+              ),
+              const SizedBox(height: 10),
+
+              // Lista de Ingredientes (sin FutureBuilder anidado)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: ingredientesReceta.length,
+                itemBuilder: (context, index) {
+                  final RecetaIngrediente ri = ingredientesReceta[index];
                   
-                  // **NOTA:** Aquí no se calcula el subtotal. Para una app real, guardarías el precio 
-                  // unitario en la tabla de unión (RecetaIngredientes) al crear la receta, 
-                  // o harías un JOIN en la DB. Por simplicidad, solo mostramos nombre y cantidad.
+                  // 🟢 ¡Optimizado! Acceso instantáneo al nombre usando el Map
+                  final String nombre = ingredienteMap[ri.ingredienteId]?.nombre ?? 'Ingrediente Desconocido';
+                  
+                  // Se puede calcular el subtotal aquí si el precio unitario se almacenara
+                  // en RecetaIngrediente, pero por ahora solo mostramos el nombre y cantidad.
                   
                   return Card(
                     elevation: 0.5,
@@ -131,11 +144,11 @@ class _RecetaDetailBody extends StatelessWidget {
                     ),
                   );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
