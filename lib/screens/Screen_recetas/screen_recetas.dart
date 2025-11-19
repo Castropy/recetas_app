@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
-import 'package:recetas_app/screens/detalle_receta_screen.dart';
-import 'package:recetas_app/screens/receta_form_screen.dart';
+import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
+import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
 //import 'package:recetas_app/widgets/shared/custom_app_bar.dart';
 
 class ScreenRecetas extends StatelessWidget {

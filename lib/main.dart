@@ -4,10 +4,10 @@ import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/receta_form_notifier.dart';
 import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
-import 'package:recetas_app/screens/detalle_receta_screen.dart';
+import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
-import 'package:recetas_app/screens/receta_form_screen.dart';
+import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
 // 1. IMPORTAR LA BASE DE DATOS
 import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta (ej. lib/data/database/database.dart)
 
