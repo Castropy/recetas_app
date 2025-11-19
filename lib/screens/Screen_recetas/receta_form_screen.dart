@@ -62,15 +62,21 @@ class RecetaFormScreen extends StatelessWidget {
             // 4. Lista de Ingredientes Seleccionados
             _ListaIngredientesSeleccionados(notifier: notifier),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 100),
 
-            // 5. Costo Total y Botón de Guardar
-            _CostoTotalSection(notifier: notifier),
             
-            const SizedBox(height: 40),
           ],
         ),
       ),
+      bottomNavigationBar: Padding(
+      padding: EdgeInsets.only(
+        left: 16.0, 
+        right: 16.0, 
+        // 4. Importante para iOS y Android: padding para la zona segura (safe area)
+        bottom: MediaQuery.of(context).padding.bottom + 10,
+      ),
+      child: _CostoTotalSection(notifier: notifier),
+    ),
     );
   }
 }
@@ -261,6 +267,8 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
   }
 }
 
+// receta_form_screen.dart - Clase _CostoTotalSection
+
 class _CostoTotalSection extends StatelessWidget {
   final RecetaFormNotifier notifier;
   
@@ -269,6 +277,7 @@ class _CostoTotalSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min, // Esto es clave en un Column dentro de bottomNavigationBar
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
@@ -289,7 +298,7 @@ class _CostoTotalSection extends StatelessWidget {
           ],
         ),
         
-        const SizedBox(height: 20),
+        const SizedBox(height: 10), // Reducimos el espacio a 10 (era 20)
         
         ElevatedButton.icon(
           onPressed: notifier.ingredientesSeleccionados.isEmpty 
@@ -305,6 +314,7 @@ class _CostoTotalSection extends StatelessWidget {
             elevation: 5,
           ),
         ),
+        // ⚠️ Eliminamos el SizedBox(height: 40) que estaba aquí
       ],
     );
   }
