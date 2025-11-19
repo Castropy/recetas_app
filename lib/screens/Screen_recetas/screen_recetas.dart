@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
+import 'package:recetas_app/widgets/shared/confirm_delete_dialog.dart';
+import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 //import 'package:recetas_app/widgets/shared/custom_app_bar.dart';
 
 class ScreenRecetas extends StatelessWidget {
@@ -71,13 +73,30 @@ class ScreenRecetas extends StatelessWidget {
                           
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {                         
-                          db.deleteRecetaTransaction(receta.id);   
-                  
-                        },
-                      ),
+                     IconButton(
+                       icon: const Icon(Icons.delete, color: Colors.red),
+                       onPressed: () async {
+                       // 🟢 1. Llamar al diálogo y esperar la confirmación
+                       final confirmed = await showConfirmDeleteDialog(
+                       context,
+                       itemName: receta.nombre,
+                      );
+
+                    // 🟢 2. Si se confirma (es 'true'), se procede a la eliminación
+                      if (confirmed == true) {
+                    // Ejecuta la transacción de eliminación en la DB
+                      db.deleteRecetaTransaction(receta.id);
+
+                      // Muestra un mensaje de éxito
+                      if (context.mounted) {
+                      NotificacionSnackBar.mostrarSnackBar(
+                        context, 
+                        'Receta "${receta.nombre}" eliminada con éxito.'
+                       );
+                     }
+               }
+    },
+  ),
                     ],
                   ),
                 ),
