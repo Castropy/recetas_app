@@ -120,5 +120,18 @@ class AppDatabase extends _$AppDatabase {
   return (select(ingredientes)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
 }
 
+// Método transaccional para eliminar la receta y sus ingredientes asociados
+Future<void> deleteRecetaTransaction(int recetaId) async {
+  await transaction(() async {
+    // 1. Eliminar todos los ingredientes relacionados en la tabla de unión
+    await (delete(recetaIngredientes)
+          ..where((tbl) => tbl.recetaId.equals(recetaId)))
+        .go();
+
+    // 2. Eliminar la Receta principal
+    await (delete(recetas)..where((tbl) => tbl.id.equals(recetaId))).go();
+  });
+}
+
   
 } 

@@ -68,14 +68,14 @@ class ScreenRecetas extends StatelessWidget {
                             DetalleRecetaScreen.routeName, 
                             arguments: receta.id // Pasamos el ID de la receta
                           );
-                          // Navigator.pushNamed(context, DetalleRecetaScreen.routeName, arguments: receta.id);
+                          
                         },
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                         
-                          // db.deleteReceta(receta.id);
+                        onPressed: () {                         
+                          db.deleteRecetaTransaction(receta.id);   
+                  
                         },
                       ),
                     ],
