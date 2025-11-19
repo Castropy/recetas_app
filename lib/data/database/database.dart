@@ -133,5 +133,26 @@ Future<void> deleteRecetaTransaction(int recetaId) async {
   });
 }
 
+// 🟢 Nuevo: Actualización transaccional de Receta y sus ingredientes
+Future<void> updateRecetaTransaction(
+      Receta receta, 
+      List<RecetaIngredientesCompanion> nuevosIngredientes) async {
+    
+    await transaction(() async {
+      // 1. Actualizar la Receta principal
+      await update(recetas).replace(receta); 
+
+      // 2. Eliminar todas las entradas antiguas en RecetaIngredientes para esta Receta
+      await (delete(recetaIngredientes)
+            ..where((tbl) => tbl.recetaId.equals(receta.id)))
+          .go();
+
+      // 3. Insertar todas las nuevas entradas de RecetaIngredientes
+      await batch((batch) {
+        batch.insertAll(recetaIngredientes, nuevosIngredientes);
+      });
+    });
+  }
+
   
 } 

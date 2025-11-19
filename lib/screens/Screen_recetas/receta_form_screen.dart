@@ -15,14 +15,31 @@ class RecetaFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Escucha el Notifier que maneja la lógica del formulario
-    final notifier = Provider.of<RecetaFormNotifier>(context);
-    final theme = Theme.of(context);
+  // 🟢 1. Obtener el ID de la ruta (si existe, estamos en modo edición)
+  final int? recetaId = ModalRoute.of(context)?.settings.arguments as int?;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear / Editar Receta'),
-      ),
+  // Escucha el Notifier que maneja la lógica del formulario
+  final notifier = Provider.of<RecetaFormNotifier>(context);
+  final theme = Theme.of(context);
+
+  // 🟢 2. Si hay un ID, cargar los datos
+  if (recetaId != null) {
+    // Usamos Future.microtask o un initState wrapper si fuera Statefull.
+    // Para Stateless y evitar llamadas redundantes:
+    Future.microtask(() => notifier.loadRecetaToEdit(recetaId));
+  } else {
+    // 🟢 3. Si no hay ID, asegurar que el formulario esté limpio para creación
+    // Esto es vital si se navega de vuelta a "crear" sin reiniciar la app.
+    if (notifier.idReceta != null) {
+      Future.microtask(() => notifier.clearForm());
+    }
+  }
+
+  return Scaffold(
+    appBar: AppBar(
+      // 🟢 4. Cambiar el título según el modo
+      title: Text(recetaId == null ? 'Crear Receta' : 'Editar Receta'),
+    ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

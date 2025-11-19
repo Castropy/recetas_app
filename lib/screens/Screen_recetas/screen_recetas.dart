@@ -73,6 +73,17 @@ class ScreenRecetas extends StatelessWidget {
                           
                         },
                       ),
+                      IconButton(
+                        // 🟢 Nuevo: Botón de Edición
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                           Navigator.pushNamed(
+                            context, 
+                            RecetaFormScreen.routeName, 
+                            arguments: receta.id // Pasamos el ID de la receta para edición
+                          );
+                        },
+                      ),
                      IconButton(
                        icon: const Icon(Icons.delete, color: Colors.red),
                        onPressed: () async {
