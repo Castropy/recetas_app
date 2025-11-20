@@ -6,7 +6,7 @@ import 'package:recetas_app/models/recipe_ingredient_model.dart';
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 
 // Notifier que gestiona el estado temporal para crear o editar una Receta
-
+ 
 class RecetaFormNotifier extends ChangeNotifier {
   final AppDatabase db;
   RecetaFormNotifier({required this.db});
@@ -57,52 +57,63 @@ class RecetaFormNotifier extends ChangeNotifier {
   
   // ... (costoTotal, updateNombre, addIngredient, removeIngredient, watchInventarioIngredientes)
 
-  // 2. 🟢 Nuevo: Limpia y Carga la Receta Existente (Modo Edición)
-  Future<void> loadRecetaToEdit(int id) async {
-    // Si ya estamos editando esta misma receta, no hacemos nada.
-    if (_idReceta == id) return; 
+ // 🟢 Nuevo: Limpia y Carga la Receta Existente (Modo Edición)
+Future<void> loadRecetaToEdit(int id) async {
+  // Si ya estamos editando esta misma receta, no hacemos nada.
+  if (_idReceta == id) return; 
 
-    clearForm(); // Limpia el estado actual antes de cargar
+  clearForm(); // Limpia el estado actual antes de cargar
 
-    // Obtener los detalles de la base de datos
-    final detailsMap = await db.getRecetaDetails(id);
-    
-    if (detailsMap.isEmpty) {
-      // Manejar error si la receta no existe
-      debugPrint('Error: Receta con ID $id no encontrada.');
-      return;
-    }
-    
-    final MapEntry<Receta, List<RecetaIngrediente>> entry = detailsMap.entries.first;
-    final Receta receta = entry.key;
-    final List<RecetaIngrediente> ingredientesDB = entry.value;
-
-    // A. Actualizar el ID y Nombre de la Receta
-    _idReceta = receta.id;
-    _nombre = receta.nombre;
-
-    // B. Transformar los ingredientes de la DB (RecetaIngrediente) a Modelos (RecipeIngredientModel)
-    for (var ri in ingredientesDB) {
-      // Para reconstruir el modelo, necesitamos obtener el Ingrediente real del inventario
-      final Ingrediente? ingrediente = await db.getIngredienteById(ri.ingredienteId);
-
-      if (ingrediente != null) {
-        final double precioUnitario = ingrediente.cantidad > 0 
-            ? (ingrediente.precio / ingrediente.cantidad) 
-            : 0.0;
-
-        _ingredientesSeleccionados.add(
-          RecipeIngredientModel(
-            ingredienteId: ri.ingredienteId,
-            nombre: ingrediente.nombre,
-            precioUnitario: precioUnitario,
-            cantidadNecesaria: ri.cantidadNecesaria,
-          ),
-        );
-      }
-    }
-    notifyListeners();
+  // 1. Obtener la Receta principal y sus entradas de unión (RecetaIngrediente)
+  final detailsMap = await db.getRecetaDetails(id);
+  
+  if (detailsMap.isEmpty) {
+    debugPrint('Error: Receta con ID $id no encontrada.');
+    return;
   }
+  
+  final MapEntry<Receta, List<RecetaIngrediente>> entry = detailsMap.entries.first;
+  final Receta receta = entry.key;
+  final List<RecetaIngrediente> ingredientesDB = entry.value;
+
+  // A. Actualizar el ID y Nombre de la Receta
+  _idReceta = receta.id;
+  _nombre = receta.nombre;
+
+  // 2. Optimización: Obtener todos los objetos Ingrediente (Nombres y Precios Unitarios)
+  final List<int> idsNecesarios = ingredientesDB.map((ri) => ri.ingredienteId).toList();
+  // 🟢 Usamos la consulta optimizada por lote (JOIN/IN)
+  final List<Ingrediente> inventarioIngredientes = await db.getIngredientesByIds(idsNecesarios);
+
+  // 3. Crear un mapa para acceso rápido O(1)
+  final Map<int, Ingrediente> ingredienteMap = {
+    for (var item in inventarioIngredientes) item.id: item
+  };
+
+  // 4. Transformar los datos de la DB a Modelos de Receta
+  _ingredientesSeleccionados = ingredientesDB.map((ri) {
+    final ingrediente = ingredienteMap[ri.ingredienteId];
+    
+    // Si el ingrediente se eliminó del inventario, lo marcamos como desconocido o lo ignoramos.
+    if (ingrediente == null) {
+      debugPrint('Advertencia: Ingrediente ID ${ri.ingredienteId} no encontrado en el inventario.');
+      return null;
+    }
+    
+    final double precioUnitario = ingrediente.cantidad > 0 
+        ? (ingrediente.precio / ingrediente.cantidad) 
+        : 0.0;
+
+    return RecipeIngredientModel(
+      ingredienteId: ri.ingredienteId,
+      nombre: ingrediente.nombre,
+      precioUnitario: precioUnitario,
+      cantidadNecesaria: ri.cantidadNecesaria,
+    );
+  }).whereType<RecipeIngredientModel>().toList(); // Filtramos cualquier elemento nulo
+
+  notifyListeners();
+}
   
   // 3. Modificación de clearForm para resetear el ID
   void clearForm() {

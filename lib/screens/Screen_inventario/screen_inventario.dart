@@ -27,11 +27,12 @@ class ScreenInventario extends StatelessWidget {
             ),
         centerTitle: true,  
       ), 
+      
       //  Consumidor para reconstruir cuando cambie la visibilidad del formulario
       body: Consumer<FormVisibilityNotifier>(
         builder: (context, notifier, child) {
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(5.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,

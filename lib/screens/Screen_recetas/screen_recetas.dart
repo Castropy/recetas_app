@@ -6,7 +6,7 @@ import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
 import 'package:recetas_app/widgets/shared/confirm_delete_dialog.dart';
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 //import 'package:recetas_app/widgets/shared/custom_app_bar.dart';
-
+ 
 class ScreenRecetas extends StatelessWidget {
   const ScreenRecetas({super.key});
 

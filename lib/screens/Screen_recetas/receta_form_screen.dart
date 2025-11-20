@@ -38,7 +38,13 @@ class RecetaFormScreen extends StatelessWidget {
   return Scaffold(
     appBar: AppBar(
       // 🟢 4. Cambiar el título según el modo
-      title: Text(recetaId == null ? 'Crear Receta' : 'Editar Receta'),
+      title: Text(recetaId == null ? 'Crear Receta' : 'Editar Receta'
+        , style: const TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 30,
+          color: Color.fromARGB(255, 45, 85, 216),
+        ),
+      ),
     ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -203,7 +209,11 @@ class _IngredienteSelector extends StatelessWidget {
                    NotificacionSnackBar.mostrarSnackBar(context, 'La cantidad debe ser mayor o igual a cero.');
                 }
               },
-              child: const Text('Guardar'),
+              child: const Text('Guardar', 
+              style: TextStyle(fontWeight: FontWeight.bold,
+              ),
+              
+              )
             ),
           ],
         );
@@ -235,16 +245,21 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = notifier.ingredientesSeleccionados[index];
         
-        return Card(
+        return Card( 
+          color: Colors.yellow,  
+          shape: StadiumBorder(),      
           elevation: 1,
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
             leading: const Icon(Icons.shopping_basket_outlined, color: Colors.indigo),
             title: Text(item.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Cantidad: ${item.cantidadNecesaria.toStringAsFixed(2)}'),
+            subtitle: Text('Cantidad: ${item.cantidadNecesaria.toStringAsFixed(2)}',
+             style: const TextStyle(fontWeight: FontWeight.bold)),
             trailing: Text(
               'Costo: \$${item.costoSubtotal.toStringAsFixed(2)}',
-              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Colors.black, 
+              fontWeight: FontWeight.bold,
+              fontSize: 16),
             ),
             onTap: () {
               // Permite editar la cantidad haciendo click en la lista

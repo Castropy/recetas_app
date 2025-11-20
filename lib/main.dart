@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/receta_form_notifier.dart';
+import 'package:recetas_app/providers/vender_notifier.dart';
 import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
 import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
@@ -44,6 +45,12 @@ void main() {
 
         ChangeNotifierProvider(
           create: (context) => RecetaFormNotifier(
+            db: context.read<AppDatabase>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => VenderNotifier(
             db: context.read<AppDatabase>(),
           ),
         ),
