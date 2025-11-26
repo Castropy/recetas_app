@@ -92,24 +92,26 @@ Future<void> loadRecetaToEdit(int id) async {
 
   // 4. Transformar los datos de la DB a Modelos de Receta
   _ingredientesSeleccionados = ingredientesDB.map((ri) {
-    final ingrediente = ingredienteMap[ri.ingredienteId];
-    
-    // Si el ingrediente se eliminó del inventario, lo marcamos como desconocido o lo ignoramos.
-    if (ingrediente == null) {
-      debugPrint('Advertencia: Ingrediente ID ${ri.ingredienteId} no encontrado en el inventario.');
-      return null;
+  final ingrediente = ingredienteMap[ri.ingredienteId];
+ 
+  if (ingrediente == null) {
+   debugPrint('Advertencia: Ingrediente ID ${ri.ingredienteId} no encontrado en el inventario.');
+   return null;
     }
-    
-    final double precioUnitario = ingrediente.cantidad > 0 
-        ? (ingrediente.precio / ingrediente.cantidad) 
-        : 0.0;
+ 
+   // 🟢 CORRECCIÓN CLAVE DE UNIDAD: Divide el costo por 1000.
+  final double costoUnitarioGuardado = ingrediente.costoUnitario;
+ // Si el costo guardado es por 1000 unidades (ej. $1 por Kg)
+ // El costo real por unidad (gramo) es 1/1000.
+   final double costoPorUnidadReceta = costoUnitarioGuardado / 1000.0; // <-- APLICAR DIVISIÓN
 
-    return RecipeIngredientModel(
-      ingredienteId: ri.ingredienteId,
-      nombre: ingrediente.nombre,
-      precioUnitario: precioUnitario,
-      cantidadNecesaria: ri.cantidadNecesaria,
-    );
+  return RecipeIngredientModel(
+   ingredienteId: ri.ingredienteId,
+   nombre: ingrediente.nombre,
+  // Usa el costo por unidad de receta corregido.
+   precioUnitario: costoPorUnidadReceta, 
+   cantidadNecesaria: ri.cantidadNecesaria,
+  );
   }).whereType<RecipeIngredientModel>().toList(); // Filtramos cualquier elemento nulo
 
   notifyListeners();
@@ -220,6 +222,20 @@ Future<void> loadRecetaToEdit(int id) async {
   }
   Stream<List<Ingrediente>> watchInventarioIngredientes() {
     return db.watchInventarioIngredientes();
+  }
+
+// 🟢 NUEVO HELPER: Transforma Ingrediente de DB a Modelo de UI con corrección de costo
+  RecipeIngredientModel createModelFromIngrediente(Ingrediente ingrediente) {
+ // Aplicamos la misma corrección de unidad aquí
+   final double costoUnitarioGuardado = ingrediente.costoUnitario;
+   final double costoPorUnidadReceta = costoUnitarioGuardado / 1000.0; // <-- APLICAR DIVISIÓN
+
+   return RecipeIngredientModel(
+    ingredienteId: ingrediente.id,
+    nombre: ingrediente.nombre,
+    precioUnitario: costoPorUnidadReceta,
+    cantidadNecesaria: 0, // Se inicializa en 0 y se ajusta en la UI
+   );
   }
   // ... (Helper para la UI de Selección de Ingredientes: watchInventarioIngredientes)
 }

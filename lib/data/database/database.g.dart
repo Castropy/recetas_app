@@ -32,10 +32,11 @@ class $IngredientesTable extends Ingredientes
   late final GeneratedColumn<int> cantidad = GeneratedColumn<int>(
       'cantidad', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _precioMeta = const VerificationMeta('precio');
+  static const VerificationMeta _costoUnitarioMeta =
+      const VerificationMeta('costoUnitario');
   @override
-  late final GeneratedColumn<double> precio = GeneratedColumn<double>(
-      'precio', aliasedName, false,
+  late final GeneratedColumn<double> costoUnitario = GeneratedColumn<double>(
+      'costo_unitario', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
   static const VerificationMeta _fechaCreacionMeta =
       const VerificationMeta('fechaCreacion');
@@ -47,7 +48,7 @@ class $IngredientesTable extends Ingredientes
           defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, nombre, cantidad, precio, fechaCreacion];
+      [id, nombre, cantidad, costoUnitario, fechaCreacion];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -73,11 +74,13 @@ class $IngredientesTable extends Ingredientes
     } else if (isInserting) {
       context.missing(_cantidadMeta);
     }
-    if (data.containsKey('precio')) {
-      context.handle(_precioMeta,
-          precio.isAcceptableOrUnknown(data['precio']!, _precioMeta));
+    if (data.containsKey('costo_unitario')) {
+      context.handle(
+          _costoUnitarioMeta,
+          costoUnitario.isAcceptableOrUnknown(
+              data['costo_unitario']!, _costoUnitarioMeta));
     } else if (isInserting) {
-      context.missing(_precioMeta);
+      context.missing(_costoUnitarioMeta);
     }
     if (data.containsKey('fecha_creacion')) {
       context.handle(
@@ -100,8 +103,8 @@ class $IngredientesTable extends Ingredientes
           .read(DriftSqlType.string, data['${effectivePrefix}nombre'])!,
       cantidad: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}cantidad'])!,
-      precio: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}precio'])!,
+      costoUnitario: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}costo_unitario'])!,
       fechaCreacion: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}fecha_creacion'])!,
     );
@@ -117,13 +120,13 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
   final int id;
   final String nombre;
   final int cantidad;
-  final double precio;
+  final double costoUnitario;
   final DateTime fechaCreacion;
   const Ingrediente(
       {required this.id,
       required this.nombre,
       required this.cantidad,
-      required this.precio,
+      required this.costoUnitario,
       required this.fechaCreacion});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -131,7 +134,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     map['id'] = Variable<int>(id);
     map['nombre'] = Variable<String>(nombre);
     map['cantidad'] = Variable<int>(cantidad);
-    map['precio'] = Variable<double>(precio);
+    map['costo_unitario'] = Variable<double>(costoUnitario);
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     return map;
   }
@@ -141,7 +144,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       id: Value(id),
       nombre: Value(nombre),
       cantidad: Value(cantidad),
-      precio: Value(precio),
+      costoUnitario: Value(costoUnitario),
       fechaCreacion: Value(fechaCreacion),
     );
   }
@@ -153,7 +156,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
       cantidad: serializer.fromJson<int>(json['cantidad']),
-      precio: serializer.fromJson<double>(json['precio']),
+      costoUnitario: serializer.fromJson<double>(json['costoUnitario']),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
     );
   }
@@ -164,7 +167,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
       'cantidad': serializer.toJson<int>(cantidad),
-      'precio': serializer.toJson<double>(precio),
+      'costoUnitario': serializer.toJson<double>(costoUnitario),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
     };
   }
@@ -173,13 +176,13 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
           {int? id,
           String? nombre,
           int? cantidad,
-          double? precio,
+          double? costoUnitario,
           DateTime? fechaCreacion}) =>
       Ingrediente(
         id: id ?? this.id,
         nombre: nombre ?? this.nombre,
         cantidad: cantidad ?? this.cantidad,
-        precio: precio ?? this.precio,
+        costoUnitario: costoUnitario ?? this.costoUnitario,
         fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       );
   Ingrediente copyWithCompanion(IngredientesCompanion data) {
@@ -187,7 +190,9 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       id: data.id.present ? data.id.value : this.id,
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
       cantidad: data.cantidad.present ? data.cantidad.value : this.cantidad,
-      precio: data.precio.present ? data.precio.value : this.precio,
+      costoUnitario: data.costoUnitario.present
+          ? data.costoUnitario.value
+          : this.costoUnitario,
       fechaCreacion: data.fechaCreacion.present
           ? data.fechaCreacion.value
           : this.fechaCreacion,
@@ -200,14 +205,15 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('cantidad: $cantidad, ')
-          ..write('precio: $precio, ')
+          ..write('costoUnitario: $costoUnitario, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, cantidad, precio, fechaCreacion);
+  int get hashCode =>
+      Object.hash(id, nombre, cantidad, costoUnitario, fechaCreacion);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -215,7 +221,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
           other.id == this.id &&
           other.nombre == this.nombre &&
           other.cantidad == this.cantidad &&
-          other.precio == this.precio &&
+          other.costoUnitario == this.costoUnitario &&
           other.fechaCreacion == this.fechaCreacion);
 }
 
@@ -223,36 +229,36 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   final Value<int> id;
   final Value<String> nombre;
   final Value<int> cantidad;
-  final Value<double> precio;
+  final Value<double> costoUnitario;
   final Value<DateTime> fechaCreacion;
   const IngredientesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.cantidad = const Value.absent(),
-    this.precio = const Value.absent(),
+    this.costoUnitario = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   });
   IngredientesCompanion.insert({
     this.id = const Value.absent(),
     required String nombre,
     required int cantidad,
-    required double precio,
+    required double costoUnitario,
     this.fechaCreacion = const Value.absent(),
   })  : nombre = Value(nombre),
         cantidad = Value(cantidad),
-        precio = Value(precio);
+        costoUnitario = Value(costoUnitario);
   static Insertable<Ingrediente> custom({
     Expression<int>? id,
     Expression<String>? nombre,
     Expression<int>? cantidad,
-    Expression<double>? precio,
+    Expression<double>? costoUnitario,
     Expression<DateTime>? fechaCreacion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
       if (cantidad != null) 'cantidad': cantidad,
-      if (precio != null) 'precio': precio,
+      if (costoUnitario != null) 'costo_unitario': costoUnitario,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
     });
   }
@@ -261,13 +267,13 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
       {Value<int>? id,
       Value<String>? nombre,
       Value<int>? cantidad,
-      Value<double>? precio,
+      Value<double>? costoUnitario,
       Value<DateTime>? fechaCreacion}) {
     return IngredientesCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       cantidad: cantidad ?? this.cantidad,
-      precio: precio ?? this.precio,
+      costoUnitario: costoUnitario ?? this.costoUnitario,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     );
   }
@@ -284,8 +290,8 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
     if (cantidad.present) {
       map['cantidad'] = Variable<int>(cantidad.value);
     }
-    if (precio.present) {
-      map['precio'] = Variable<double>(precio.value);
+    if (costoUnitario.present) {
+      map['costo_unitario'] = Variable<double>(costoUnitario.value);
     }
     if (fechaCreacion.present) {
       map['fecha_creacion'] = Variable<DateTime>(fechaCreacion.value);
@@ -299,7 +305,7 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('cantidad: $cantidad, ')
-          ..write('precio: $precio, ')
+          ..write('costoUnitario: $costoUnitario, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
@@ -844,7 +850,7 @@ typedef $$IngredientesTableCreateCompanionBuilder = IngredientesCompanion
   Value<int> id,
   required String nombre,
   required int cantidad,
-  required double precio,
+  required double costoUnitario,
   Value<DateTime> fechaCreacion,
 });
 typedef $$IngredientesTableUpdateCompanionBuilder = IngredientesCompanion
@@ -852,7 +858,7 @@ typedef $$IngredientesTableUpdateCompanionBuilder = IngredientesCompanion
   Value<int> id,
   Value<String> nombre,
   Value<int> cantidad,
-  Value<double> precio,
+  Value<double> costoUnitario,
   Value<DateTime> fechaCreacion,
 });
 
@@ -896,8 +902,8 @@ class $$IngredientesTableFilterComposer
   ColumnFilters<int> get cantidad => $composableBuilder(
       column: $table.cantidad, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<double> get precio => $composableBuilder(
-      column: $table.precio, builder: (column) => ColumnFilters(column));
+  ColumnFilters<double> get costoUnitario => $composableBuilder(
+      column: $table.costoUnitario, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get fechaCreacion => $composableBuilder(
       column: $table.fechaCreacion, builder: (column) => ColumnFilters(column));
@@ -942,8 +948,9 @@ class $$IngredientesTableOrderingComposer
   ColumnOrderings<int> get cantidad => $composableBuilder(
       column: $table.cantidad, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<double> get precio => $composableBuilder(
-      column: $table.precio, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<double> get costoUnitario => $composableBuilder(
+      column: $table.costoUnitario,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get fechaCreacion => $composableBuilder(
       column: $table.fechaCreacion,
@@ -968,8 +975,8 @@ class $$IngredientesTableAnnotationComposer
   GeneratedColumn<int> get cantidad =>
       $composableBuilder(column: $table.cantidad, builder: (column) => column);
 
-  GeneratedColumn<double> get precio =>
-      $composableBuilder(column: $table.precio, builder: (column) => column);
+  GeneratedColumn<double> get costoUnitario => $composableBuilder(
+      column: $table.costoUnitario, builder: (column) => column);
 
   GeneratedColumn<DateTime> get fechaCreacion => $composableBuilder(
       column: $table.fechaCreacion, builder: (column) => column);
@@ -1023,28 +1030,28 @@ class $$IngredientesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> nombre = const Value.absent(),
             Value<int> cantidad = const Value.absent(),
-            Value<double> precio = const Value.absent(),
+            Value<double> costoUnitario = const Value.absent(),
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion(
             id: id,
             nombre: nombre,
             cantidad: cantidad,
-            precio: precio,
+            costoUnitario: costoUnitario,
             fechaCreacion: fechaCreacion,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String nombre,
             required int cantidad,
-            required double precio,
+            required double costoUnitario,
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion.insert(
             id: id,
             nombre: nombre,
             cantidad: cantidad,
-            precio: precio,
+            costoUnitario: costoUnitario,
             fechaCreacion: fechaCreacion,
           ),
           withReferenceMapper: (p0) => p0

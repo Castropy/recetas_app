@@ -73,7 +73,7 @@ class IngredienteListView extends StatelessWidget {
   ),
   ),
          subtitle: Text(
-         'Id: ${ing.id} | Stock: ${ing.cantidad} | Precio: \$${ing.precio.toStringAsFixed(2)}',
+         'Id: ${ing.id} | Stock: ${ing.cantidad} | Precio: \$${ing.costoUnitario.toStringAsFixed(2)}',
          style: const TextStyle(
          color: Color.fromARGB(255, 248, 246, 246),
          fontSize: 10,

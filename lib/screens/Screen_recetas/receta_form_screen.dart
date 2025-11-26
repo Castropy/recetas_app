@@ -158,13 +158,15 @@ class _IngredienteSelector extends StatelessWidget {
     // Obtener la cantidad ya seleccionada si existe
     final existingItem = notifier.ingredientesSeleccionados.firstWhere(
       (i) => i.ingredienteId == ingrediente.id, 
-      orElse: () => RecipeIngredientModel(
-        ingredienteId: ingrediente.id,
-        nombre: ingrediente.nombre,
-        // Evitamos división por cero al calcular el precio unitario
-        precioUnitario: ingrediente.cantidad > 0 ? (ingrediente.precio / ingrediente.cantidad) : 0.0,
-        cantidadNecesaria: 0,
-      )
+      // ✅ CÓDIGO CORREGIDO (Línea 149)
+   orElse: () => RecipeIngredientModel(
+     ingredienteId: ingrediente.id,
+     nombre: ingrediente.nombre,
+  // ✅ CORRECCIÓN: Usamos el costoUnitario del inventario (ej. $1.0 por Kg)
+ // y lo dividimos por 1000 para obtener el costo por unidad de receta (gramo).
+     precioUnitario: ingrediente.costoUnitario / 1000.0, 
+     cantidadNecesaria: 0,
+  )
     );
     
     controller.text = existingItem.cantidadNecesaria > 0 ? existingItem.cantidadNecesaria.toString() : '';
@@ -196,13 +198,15 @@ class _IngredienteSelector extends StatelessWidget {
               onPressed: () {
                 final double? cantidad = double.tryParse(controller.text);
                 if (cantidad != null && cantidad >= 0) {
-                  final newItem = RecipeIngredientModel(
-                    ingredienteId: ingrediente.id,
-                    nombre: ingrediente.nombre,
-                    // Calculamos el costo unitario del inventario: Precio Total / Cantidad en stock
-                    precioUnitario: ingrediente.cantidad > 0 ? (ingrediente.precio / ingrediente.cantidad) : 0.0,
-                    cantidadNecesaria: cantidad,
-                  );
+                  // ✅ CÓDIGO CORREGIDO (Línea 177)
+                 final newItem = RecipeIngredientModel(
+                  ingredienteId: ingrediente.id,
+                  nombre: ingrediente.nombre,
+                 // ✅ CORRECCIÓN: Usamos el costoUnitario del inventario (ej. $1.0 por Kg)
+                // y lo dividimos por 1000 para obtener el costo por unidad de receta (gramo).
+                 precioUnitario: ingrediente.costoUnitario / 1000.0,
+                 cantidadNecesaria: cantidad,
+        );
                   notifier.addIngredient(newItem);
                   Navigator.of(context).pop();
                 } else if (cantidad != null && cantidad < 0){
@@ -268,7 +272,7 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
                 nombre: item.nombre, 
                 // Estos valores son simulados, solo se necesita el ID y nombre para el diálogo
                 cantidad: 1, 
-                precio: item.precioUnitario, 
+                costoUnitario: item.precioUnitario, 
                 fechaCreacion: DateTime.now()
               );
               
