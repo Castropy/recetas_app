@@ -4,7 +4,7 @@ class ScreenReporte extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Pantalla D'),
+      child: Text('Aqui iran los reportes'),
     );
   }
 }  

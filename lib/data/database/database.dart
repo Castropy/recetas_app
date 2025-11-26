@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-
+import 'dart:convert';
 part 'database.g.dart'; 
 
 
@@ -42,6 +42,20 @@ class RecetaIngredientes extends Table {
   @override
   Set<Column> get primaryKey => {recetaId, ingredienteId};
   
+}
+
+class Transacciones extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  // Fecha y hora del evento
+  DateTimeColumn get fechaHora => dateTime().withDefault(currentDateAndTime)();
+  // 'Venta', 'Edicion', 'Eliminado', 'Alta'
+  TextColumn get tipo => text().withLength(max: 15)();
+  // 'Ingrediente', 'Receta'
+  TextColumn get entidad => text().withLength(max: 15)(); 
+  // ID del objeto afectado (Ingrediente ID o Receta ID)
+  IntColumn get entidadId => integer().nullable()(); 
+  // Almacena un JSON con los detalles del cambio (ej: antes/después de la edición, ingredientes consumidos en la venta)
+  TextColumn get detalles => text()(); 
 }
 
 class InsufficientStockException implements Exception {
