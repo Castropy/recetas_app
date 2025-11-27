@@ -10,7 +10,7 @@ import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
 import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
 // 1. IMPORTAR LA BASE DE DATOS
-import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta (ej. lib/data/database/database.dart)
+import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta 
 
 void main() {
   // 2. Asegurarse que los bindings de Flutter estén inicializados

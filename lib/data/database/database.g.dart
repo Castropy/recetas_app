@@ -830,6 +830,346 @@ class RecetaIngredientesCompanion extends UpdateCompanion<RecetaIngrediente> {
   }
 }
 
+class $TransaccionesTable extends Transacciones
+    with TableInfo<$TransaccionesTable, Transaccione> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TransaccionesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _fechaHoraMeta =
+      const VerificationMeta('fechaHora');
+  @override
+  late final GeneratedColumn<DateTime> fechaHora = GeneratedColumn<DateTime>(
+      'fecha_hora', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+      'tipo', aliasedName, false,
+      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 15),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _entidadMeta =
+      const VerificationMeta('entidad');
+  @override
+  late final GeneratedColumn<String> entidad = GeneratedColumn<String>(
+      'entidad', aliasedName, false,
+      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 15),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _entidadIdMeta =
+      const VerificationMeta('entidadId');
+  @override
+  late final GeneratedColumn<int> entidadId = GeneratedColumn<int>(
+      'entidad_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _detallesMeta =
+      const VerificationMeta('detalles');
+  @override
+  late final GeneratedColumn<String> detalles = GeneratedColumn<String>(
+      'detalles', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, fechaHora, tipo, entidad, entidadId, detalles];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'transacciones';
+  @override
+  VerificationContext validateIntegrity(Insertable<Transaccione> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('fecha_hora')) {
+      context.handle(_fechaHoraMeta,
+          fechaHora.isAcceptableOrUnknown(data['fecha_hora']!, _fechaHoraMeta));
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+          _tipoMeta, tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta));
+    } else if (isInserting) {
+      context.missing(_tipoMeta);
+    }
+    if (data.containsKey('entidad')) {
+      context.handle(_entidadMeta,
+          entidad.isAcceptableOrUnknown(data['entidad']!, _entidadMeta));
+    } else if (isInserting) {
+      context.missing(_entidadMeta);
+    }
+    if (data.containsKey('entidad_id')) {
+      context.handle(_entidadIdMeta,
+          entidadId.isAcceptableOrUnknown(data['entidad_id']!, _entidadIdMeta));
+    }
+    if (data.containsKey('detalles')) {
+      context.handle(_detallesMeta,
+          detalles.isAcceptableOrUnknown(data['detalles']!, _detallesMeta));
+    } else if (isInserting) {
+      context.missing(_detallesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Transaccione map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Transaccione(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      fechaHora: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}fecha_hora'])!,
+      tipo: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tipo'])!,
+      entidad: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entidad'])!,
+      entidadId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}entidad_id']),
+      detalles: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}detalles'])!,
+    );
+  }
+
+  @override
+  $TransaccionesTable createAlias(String alias) {
+    return $TransaccionesTable(attachedDatabase, alias);
+  }
+}
+
+class Transaccione extends DataClass implements Insertable<Transaccione> {
+  final int id;
+  final DateTime fechaHora;
+  final String tipo;
+  final String entidad;
+  final int? entidadId;
+  final String detalles;
+  const Transaccione(
+      {required this.id,
+      required this.fechaHora,
+      required this.tipo,
+      required this.entidad,
+      this.entidadId,
+      required this.detalles});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['fecha_hora'] = Variable<DateTime>(fechaHora);
+    map['tipo'] = Variable<String>(tipo);
+    map['entidad'] = Variable<String>(entidad);
+    if (!nullToAbsent || entidadId != null) {
+      map['entidad_id'] = Variable<int>(entidadId);
+    }
+    map['detalles'] = Variable<String>(detalles);
+    return map;
+  }
+
+  TransaccionesCompanion toCompanion(bool nullToAbsent) {
+    return TransaccionesCompanion(
+      id: Value(id),
+      fechaHora: Value(fechaHora),
+      tipo: Value(tipo),
+      entidad: Value(entidad),
+      entidadId: entidadId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(entidadId),
+      detalles: Value(detalles),
+    );
+  }
+
+  factory Transaccione.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Transaccione(
+      id: serializer.fromJson<int>(json['id']),
+      fechaHora: serializer.fromJson<DateTime>(json['fechaHora']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      entidad: serializer.fromJson<String>(json['entidad']),
+      entidadId: serializer.fromJson<int?>(json['entidadId']),
+      detalles: serializer.fromJson<String>(json['detalles']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fechaHora': serializer.toJson<DateTime>(fechaHora),
+      'tipo': serializer.toJson<String>(tipo),
+      'entidad': serializer.toJson<String>(entidad),
+      'entidadId': serializer.toJson<int?>(entidadId),
+      'detalles': serializer.toJson<String>(detalles),
+    };
+  }
+
+  Transaccione copyWith(
+          {int? id,
+          DateTime? fechaHora,
+          String? tipo,
+          String? entidad,
+          Value<int?> entidadId = const Value.absent(),
+          String? detalles}) =>
+      Transaccione(
+        id: id ?? this.id,
+        fechaHora: fechaHora ?? this.fechaHora,
+        tipo: tipo ?? this.tipo,
+        entidad: entidad ?? this.entidad,
+        entidadId: entidadId.present ? entidadId.value : this.entidadId,
+        detalles: detalles ?? this.detalles,
+      );
+  Transaccione copyWithCompanion(TransaccionesCompanion data) {
+    return Transaccione(
+      id: data.id.present ? data.id.value : this.id,
+      fechaHora: data.fechaHora.present ? data.fechaHora.value : this.fechaHora,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      entidad: data.entidad.present ? data.entidad.value : this.entidad,
+      entidadId: data.entidadId.present ? data.entidadId.value : this.entidadId,
+      detalles: data.detalles.present ? data.detalles.value : this.detalles,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Transaccione(')
+          ..write('id: $id, ')
+          ..write('fechaHora: $fechaHora, ')
+          ..write('tipo: $tipo, ')
+          ..write('entidad: $entidad, ')
+          ..write('entidadId: $entidadId, ')
+          ..write('detalles: $detalles')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, fechaHora, tipo, entidad, entidadId, detalles);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Transaccione &&
+          other.id == this.id &&
+          other.fechaHora == this.fechaHora &&
+          other.tipo == this.tipo &&
+          other.entidad == this.entidad &&
+          other.entidadId == this.entidadId &&
+          other.detalles == this.detalles);
+}
+
+class TransaccionesCompanion extends UpdateCompanion<Transaccione> {
+  final Value<int> id;
+  final Value<DateTime> fechaHora;
+  final Value<String> tipo;
+  final Value<String> entidad;
+  final Value<int?> entidadId;
+  final Value<String> detalles;
+  const TransaccionesCompanion({
+    this.id = const Value.absent(),
+    this.fechaHora = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.entidad = const Value.absent(),
+    this.entidadId = const Value.absent(),
+    this.detalles = const Value.absent(),
+  });
+  TransaccionesCompanion.insert({
+    this.id = const Value.absent(),
+    this.fechaHora = const Value.absent(),
+    required String tipo,
+    required String entidad,
+    this.entidadId = const Value.absent(),
+    required String detalles,
+  })  : tipo = Value(tipo),
+        entidad = Value(entidad),
+        detalles = Value(detalles);
+  static Insertable<Transaccione> custom({
+    Expression<int>? id,
+    Expression<DateTime>? fechaHora,
+    Expression<String>? tipo,
+    Expression<String>? entidad,
+    Expression<int>? entidadId,
+    Expression<String>? detalles,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fechaHora != null) 'fecha_hora': fechaHora,
+      if (tipo != null) 'tipo': tipo,
+      if (entidad != null) 'entidad': entidad,
+      if (entidadId != null) 'entidad_id': entidadId,
+      if (detalles != null) 'detalles': detalles,
+    });
+  }
+
+  TransaccionesCompanion copyWith(
+      {Value<int>? id,
+      Value<DateTime>? fechaHora,
+      Value<String>? tipo,
+      Value<String>? entidad,
+      Value<int?>? entidadId,
+      Value<String>? detalles}) {
+    return TransaccionesCompanion(
+      id: id ?? this.id,
+      fechaHora: fechaHora ?? this.fechaHora,
+      tipo: tipo ?? this.tipo,
+      entidad: entidad ?? this.entidad,
+      entidadId: entidadId ?? this.entidadId,
+      detalles: detalles ?? this.detalles,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fechaHora.present) {
+      map['fecha_hora'] = Variable<DateTime>(fechaHora.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (entidad.present) {
+      map['entidad'] = Variable<String>(entidad.value);
+    }
+    if (entidadId.present) {
+      map['entidad_id'] = Variable<int>(entidadId.value);
+    }
+    if (detalles.present) {
+      map['detalles'] = Variable<String>(detalles.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TransaccionesCompanion(')
+          ..write('id: $id, ')
+          ..write('fechaHora: $fechaHora, ')
+          ..write('tipo: $tipo, ')
+          ..write('entidad: $entidad, ')
+          ..write('entidadId: $entidadId, ')
+          ..write('detalles: $detalles')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -837,12 +1177,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RecetasTable recetas = $RecetasTable(this);
   late final $RecetaIngredientesTable recetaIngredientes =
       $RecetaIngredientesTable(this);
+  late final $TransaccionesTable transacciones = $TransaccionesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [ingredientes, recetas, recetaIngredientes];
+      [ingredientes, recetas, recetaIngredientes, transacciones];
 }
 
 typedef $$IngredientesTableCreateCompanionBuilder = IngredientesCompanion
@@ -1665,6 +2006,188 @@ typedef $$RecetaIngredientesTableProcessedTableManager = ProcessedTableManager<
     (RecetaIngrediente, $$RecetaIngredientesTableReferences),
     RecetaIngrediente,
     PrefetchHooks Function({bool recetaId, bool ingredienteId})>;
+typedef $$TransaccionesTableCreateCompanionBuilder = TransaccionesCompanion
+    Function({
+  Value<int> id,
+  Value<DateTime> fechaHora,
+  required String tipo,
+  required String entidad,
+  Value<int?> entidadId,
+  required String detalles,
+});
+typedef $$TransaccionesTableUpdateCompanionBuilder = TransaccionesCompanion
+    Function({
+  Value<int> id,
+  Value<DateTime> fechaHora,
+  Value<String> tipo,
+  Value<String> entidad,
+  Value<int?> entidadId,
+  Value<String> detalles,
+});
+
+class $$TransaccionesTableFilterComposer
+    extends Composer<_$AppDatabase, $TransaccionesTable> {
+  $$TransaccionesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get fechaHora => $composableBuilder(
+      column: $table.fechaHora, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+      column: $table.tipo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entidad => $composableBuilder(
+      column: $table.entidad, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get entidadId => $composableBuilder(
+      column: $table.entidadId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get detalles => $composableBuilder(
+      column: $table.detalles, builder: (column) => ColumnFilters(column));
+}
+
+class $$TransaccionesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TransaccionesTable> {
+  $$TransaccionesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get fechaHora => $composableBuilder(
+      column: $table.fechaHora, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+      column: $table.tipo, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entidad => $composableBuilder(
+      column: $table.entidad, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get entidadId => $composableBuilder(
+      column: $table.entidadId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get detalles => $composableBuilder(
+      column: $table.detalles, builder: (column) => ColumnOrderings(column));
+}
+
+class $$TransaccionesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TransaccionesTable> {
+  $$TransaccionesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaHora =>
+      $composableBuilder(column: $table.fechaHora, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get entidad =>
+      $composableBuilder(column: $table.entidad, builder: (column) => column);
+
+  GeneratedColumn<int> get entidadId =>
+      $composableBuilder(column: $table.entidadId, builder: (column) => column);
+
+  GeneratedColumn<String> get detalles =>
+      $composableBuilder(column: $table.detalles, builder: (column) => column);
+}
+
+class $$TransaccionesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TransaccionesTable,
+    Transaccione,
+    $$TransaccionesTableFilterComposer,
+    $$TransaccionesTableOrderingComposer,
+    $$TransaccionesTableAnnotationComposer,
+    $$TransaccionesTableCreateCompanionBuilder,
+    $$TransaccionesTableUpdateCompanionBuilder,
+    (
+      Transaccione,
+      BaseReferences<_$AppDatabase, $TransaccionesTable, Transaccione>
+    ),
+    Transaccione,
+    PrefetchHooks Function()> {
+  $$TransaccionesTableTableManager(_$AppDatabase db, $TransaccionesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TransaccionesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TransaccionesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TransaccionesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<DateTime> fechaHora = const Value.absent(),
+            Value<String> tipo = const Value.absent(),
+            Value<String> entidad = const Value.absent(),
+            Value<int?> entidadId = const Value.absent(),
+            Value<String> detalles = const Value.absent(),
+          }) =>
+              TransaccionesCompanion(
+            id: id,
+            fechaHora: fechaHora,
+            tipo: tipo,
+            entidad: entidad,
+            entidadId: entidadId,
+            detalles: detalles,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<DateTime> fechaHora = const Value.absent(),
+            required String tipo,
+            required String entidad,
+            Value<int?> entidadId = const Value.absent(),
+            required String detalles,
+          }) =>
+              TransaccionesCompanion.insert(
+            id: id,
+            fechaHora: fechaHora,
+            tipo: tipo,
+            entidad: entidad,
+            entidadId: entidadId,
+            detalles: detalles,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TransaccionesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TransaccionesTable,
+    Transaccione,
+    $$TransaccionesTableFilterComposer,
+    $$TransaccionesTableOrderingComposer,
+    $$TransaccionesTableAnnotationComposer,
+    $$TransaccionesTableCreateCompanionBuilder,
+    $$TransaccionesTableUpdateCompanionBuilder,
+    (
+      Transaccione,
+      BaseReferences<_$AppDatabase, $TransaccionesTable, Transaccione>
+    ),
+    Transaccione,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1675,4 +2198,6 @@ class $AppDatabaseManager {
       $$RecetasTableTableManager(_db, _db.recetas);
   $$RecetaIngredientesTableTableManager get recetaIngredientes =>
       $$RecetaIngredientesTableTableManager(_db, _db.recetaIngredientes);
+  $$TransaccionesTableTableManager get transacciones =>
+      $$TransaccionesTableTableManager(_db, _db.transacciones);
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../data/database/database.dart'; 
+import 'dart:convert';
+import 'package:drift/drift.dart';
+
 
 class InventarioFormNotifier extends ChangeNotifier {
   final AppDatabase db;
   InventarioFormNotifier({required this.db});
+  Ingrediente? _ingredienteAntes; // Para almacenar el estado previo al editar
 
   int? _editingIngredienteId;
   int? get editingIngredienteId => _editingIngredienteId;
@@ -28,13 +32,13 @@ class InventarioFormNotifier extends ChangeNotifier {
   }
 
   void loadIngredienteForEditing(Ingrediente ingrediente) {
+   _ingredienteAntes = ingrediente; // Guardamos el objeto actual
    _editingIngredienteId = ingrediente.id;
    nombre = ingrediente.nombre;
    cantidad = ingrediente.cantidad.toString(); 
- // 🟢 USAR el nuevo campo costoUnitario
    precio = ingrediente.costoUnitario.toString(); 
    notifyListeners();
- }
+}
   
   void clearForm() {
     _editingIngredienteId = null;
@@ -48,52 +52,106 @@ class InventarioFormNotifier extends ChangeNotifier {
 
 // ... (métodos loadIngredienteForEditing y clearForm)
 
-  void guardarDatos() async {
-   final String nombreItem = nombre.trim();
-   final int? cant = int.tryParse(cantidad.trim());
-   final double? prec = double.tryParse(precio.trim()); 
-
-  // 1. Validación de campos
-   if (nombreItem.isEmpty || cant == null || prec == null || cant <= 0 || prec <= 0) {
-    debugPrint('Error de validación: Revise los campos.');
+  // 🟢 MODIFICACIÓN: guardarDatos para registrar Transacción
+void guardarDatos() async {
+  // ... (Validaciones existentes)
+  final nombreItem = nombre.trim();
+  if (nombreItem.isEmpty) {
+    // Aquí puedes manejar una notificación de error o simplemente retornar
+    debugPrint('Error: El nombre es obligatorio.');
     return;
   }
-
-   try {
+  
+  // 2. Parsar y validar cantidad (de String a Int)
+  final cant = int.tryParse(cantidad);
+  if (cant == null || cant < 0) {
+    debugPrint('Error: La cantidad debe ser un número entero válido.');
+    return;
+  }
+  
+  // 3. Parsar y validar precio (de String a Double)
+  final prec = double.tryParse(precio);
+  if (prec == null || prec < 0) {
+    debugPrint('Error: El precio debe ser un número decimal válido.');
+    return;
+  }
+  
+  try {
     if (_editingIngredienteId != null) {
-  // --- MODO EDICIÓN ---
-        // 🟢 Corrección 1: Definir idToUpdate
-     final idToUpdate = _editingIngredienteId!; 
-  
-        // 🟢 Corrección 2: Asegurar el tipo INT para 'cant' y Double para 'prec' con !
-     final ingredienteToUpdate = Ingrediente(
-      id: idToUpdate,
-      nombre: nombreItem,
-      cantidad: cant, // Ya es int!
-      costoUnitario: prec, // Ya es double!
-      fechaCreacion: DateTime.now(), 
-  );
+      // --- MODO EDICIÓN ---
+      final idToUpdate = _editingIngredienteId!; 
+      
+      final ingredienteToUpdate = Ingrediente(
+        id: idToUpdate,
+        nombre:  nombreItem,
+        cantidad: cant,
+        costoUnitario: prec,
+        fechaCreacion: _ingredienteAntes!.fechaCreacion, // Usar la fecha original
+      );
 
-  // 🟢 Corrección 3 y 4: Llamada correcta y uso de 'ingredienteToUpdate'
-     await db.updateIngrediente(ingredienteToUpdate); 
-     debugPrint('Ingrediente "$nombreItem" actualizado (ID: $idToUpdate) con éxito!');
-  
-  } else {
-  // --- MODO INSERCIÓN ---
-        // 🟢 Corrección 2: Asegurar el tipo INT para 'cant' y Double para 'prec' con !
-     final ingredienteCompanion = IngredientesCompanion.insert(
-      nombre: nombreItem,
-      cantidad: cant, // Usar !
-      costoUnitario: prec, // Usar !
- );
-     await db.insertIngrediente(ingredienteCompanion);
-     debugPrint('Ingrediente "$nombreItem" guardado con éxito!');
+      await db.updateIngrediente(ingredienteToUpdate); 
+      
+      // 🟢 REGISTRO DE HISTORIAL (Edición)
+      final String detallesJson = jsonEncode({
+        "antes": {"cant": _ingredienteAntes!.cantidad, "costo": _ingredienteAntes!.costoUnitario},
+        "despues": {"cant": cant, "costo": prec},
+      });
+
+      await db.insertTransaccion(TransaccionesCompanion.insert(
+        tipo: 'Edición',
+        entidad: 'Ingrediente',
+        entidadId: Value(idToUpdate),
+        detalles: detallesJson,
+      ));
+
+    } else {
+      // --- MODO INSERCIÓN ---
+      final ingredienteCompanion = IngredientesCompanion.insert(
+        nombre: nombreItem,
+        cantidad: cant,
+        costoUnitario: prec,
+      );
+      final int newId = await db.insertIngrediente(ingredienteCompanion);
+      
+      // 🟢 REGISTRO DE HISTORIAL (Alta)
+      await db.insertTransaccion(TransaccionesCompanion.insert(
+        tipo: 'Alta',
+        entidad: 'Ingrediente',
+        entidadId: Value(newId),
+        detalles: '{"cant": $cant, "costo": $prec}',
+      ));
     }
- 
+  
   } catch (e) {
     debugPrint('Error al guardar/actualizar ingrediente en DB: $e');
   }
- // 2. Limpiar formulario después de éxito o error de DB
-   clearForm();
- }
+  _ingredienteAntes = null; // Limpiar estado anterior
+  clearForm();
+}
+
+Future<void> deleteIngredienteConHistorial(Ingrediente ingrediente) async {
+  try {
+    // 1. Eliminar de la DB
+    await db.deleteIngrediente(ingrediente.id);
+
+    // 2. Registrar Historial
+    final String detallesJson = jsonEncode({
+      "nombre": ingrediente.nombre,
+      "cant": ingrediente.cantidad,
+      "costo": ingrediente.costoUnitario,
+    });
+
+    await db.insertTransaccion(TransaccionesCompanion.insert(
+      tipo: 'Eliminado',
+      entidad: 'Ingrediente',
+      entidadId: Value(ingrediente.id),
+      detalles: detallesJson,
+    ));
+
+  } catch (e) {
+    debugPrint('Error al eliminar ingrediente en DB: $e');
+  }
+  notifyListeners();
+}
+
 }

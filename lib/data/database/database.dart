@@ -76,11 +76,31 @@ class _RecetaVentaInfo {
 }
  
 
-@DriftDatabase(tables: [Ingredientes, Recetas, RecetaIngredientes])
+@DriftDatabase(tables: [Ingredientes, Recetas, RecetaIngredientes, Transacciones])
 class AppDatabase extends _$AppDatabase { 
   AppDatabase() : super(_openConnection());
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+  @override
+MigrationStrategy get migration { // 🟢 CAMBIO CLAVE: Usar MigrationStrategy
+  return MigrationStrategy(
+   onCreate: (Migrator m) async { // 🟢 ¡Añade 'async' aquí!
+  // El método onCreate, por convención de Drift, es asíncrono.
+  // Drift se encarga de llamar a m.createAll() implícitamente,
+  // pero si quieres que sea explícito (buena práctica), podrías añadir:
+  await m.createAll();
+},
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Esta es la lógica que se ejecuta al pasar de una versión anterior a una nueva.
+      if (from < 2) {
+        // La versión anterior era 1, solo necesitamos crear la nueva tabla.
+        await m.createTable(transacciones);
+      }
+    },
+    // Otras opciones si las necesitas:
+    // beforeOpen: (details) async {...} 
+  );
+}
 
   // ... (Queries)
   Future<List<Ingrediente>> getAllIngredientes() => select(ingredientes).get();
@@ -98,31 +118,33 @@ class AppDatabase extends _$AppDatabase {
   } 
   
   Future<void> saveRecetaTransaction(
-      RecetasCompanion receta, 
-      List<RecetaIngredientesCompanion> ingredientes) async {
-    
-    // Inicia una transacción
-    await transaction(() async {
-      // 1. Insertar la Receta principal. Esto devuelve el ID autogenerado (INT).
-      final int recetaId = await into(recetas).insert(receta);
+    RecetasCompanion receta, 
+    List<RecetaIngredientesCompanion> ingredientes) async {
+  
+  await transaction(() async {
+    final int recetaId = await into(recetas).insert(receta);
 
-      // 2. Preparar los compañeros de Ingredientes para la inserción.
-      final List<RecetaIngredientesCompanion> listToInsert = [];
+    final List<RecetaIngredientesCompanion> listToInsert = [];
 
-      for (var item in ingredientes) {
-        // 🟢 CLAVE: Creamos una COPIA del Companion, inyectando el ID real de la receta.
-        final RecetaIngredientesCompanion updatedCompanion = item.copyWith(
-          recetaId: Value(recetaId), // Inyectamos el ID de la receta que acabamos de crear
-        );
-        listToInsert.add(updatedCompanion);
-      }
-      await batch((batch) {
-        batch.insertAll(recetaIngredientes, listToInsert);
-      });
-      
-      return recetaId;
+    for (var item in ingredientes) {
+      final RecetaIngredientesCompanion updatedCompanion = item.copyWith(
+        recetaId: Value(recetaId), 
+      );
+      listToInsert.add(updatedCompanion);
+    }
+    await batch((batch) {
+      batch.insertAll(recetaIngredientes, listToInsert);
     });
-  }
+    
+    // 🟢 REGISTRO DE HISTORIAL (Creación de Receta)
+    await insertTransaccion(TransaccionesCompanion.insert(
+      tipo: 'Alta',
+      entidad: 'Receta',
+      entidadId: Value(recetaId),
+      detalles: '{"nombre": "${receta.nombre.value}", "costo": ${receta.costoTotal.value}}',
+    ));
+  });
+}
 
   // Obtener todas las recetas (para listar en ScreenRecetas)
   Stream<List<Receta>> watchAllRecetas() => select(recetas).watch();
@@ -154,14 +176,27 @@ class AppDatabase extends _$AppDatabase {
 
 // Método transaccional para eliminar la receta y sus ingredientes asociados
 Future<void> deleteRecetaTransaction(int recetaId) async {
-  await transaction(() async {
-    // 1. Eliminar todos los ingredientes relacionados en la tabla de unión
-    await (delete(recetaIngredientes)
-          ..where((tbl) => tbl.recetaId.equals(recetaId)))
-        .go();
+  // 🔔 Opcional: Obtener detalles 'antes' de eliminar
+  final Receta? recetaAEliminar = await (select(recetas)..where((tbl) => tbl.id.equals(recetaId))).getSingleOrNull();
 
-    // 2. Eliminar la Receta principal
+  await transaction(() async {
+    await (delete(recetaIngredientes)
+        ..where((tbl) => tbl.recetaId.equals(recetaId)))
+      .go();
+
     await (delete(recetas)..where((tbl) => tbl.id.equals(recetaId))).go();
+    
+    // 🟢 REGISTRO DE HISTORIAL (Eliminación de Receta)
+    final String detallesJson = recetaAEliminar == null ? 
+        'Receta no encontrada' : 
+        '{"nombre": "${recetaAEliminar.nombre}", "costo": ${recetaAEliminar.costoTotal.toStringAsFixed(2)}}';
+
+    await insertTransaccion(TransaccionesCompanion.insert(
+      tipo: 'Eliminado',
+      entidad: 'Receta',
+      entidadId: Value(recetaId),
+      detalles: detallesJson,
+    ));
   });
 }
 
@@ -170,19 +205,33 @@ Future<void> updateRecetaTransaction(
       Receta receta, 
       List<RecetaIngredientesCompanion> nuevosIngredientes) async {
     
+    // 🔔 Opcional: Obtener el estado 'antes' para el JSON de detalles
+    final Receta? recetaAntes = await (select(recetas)..where((tbl) => tbl.id.equals(receta.id))).getSingleOrNull();
+
     await transaction(() async {
-      // 1. Actualizar la Receta principal
+      // ... (Pasos 1, 2 y 3 de la actualización: update, delete, insert)
       await update(recetas).replace(receta); 
 
-      // 2. Eliminar todas las entradas antiguas en RecetaIngredientes para esta Receta
       await (delete(recetaIngredientes)
-            ..where((tbl) => tbl.recetaId.equals(receta.id)))
-          .go();
+          ..where((tbl) => tbl.recetaId.equals(receta.id)))
+        .go();
 
-      // 3. Insertar todas las nuevas entradas de RecetaIngredientes
       await batch((batch) {
         batch.insertAll(recetaIngredientes, nuevosIngredientes);
       });
+      
+      // 🟢 REGISTRO DE HISTORIAL (Edición de Receta)
+      final String detallesJson = '''{
+          "antes": {"nombre": "${recetaAntes?.nombre}", "costo": ${recetaAntes?.costoTotal.toStringAsFixed(2)}},
+          "despues": {"nombre": "${receta.nombre}", "costo": ${receta.costoTotal.toStringAsFixed(2)}}
+      }''';
+
+      await insertTransaccion(TransaccionesCompanion.insert(
+        tipo: 'Edición',
+        entidad: 'Receta',
+        entidadId: Value(receta.id),
+        detalles: detallesJson,
+      ));
     });
   }
 
@@ -194,7 +243,7 @@ Future<void> updateRecetaTransaction(
 
 // Método de Transacción para Vender Receta
 Future<void> venderRecetaTransaction(int recetaId) async {
-  // ... (código de obtención de ingredientes sin cambios)
+  // 🟢 Bloque de obtención de ingredientesDeReceta DEBE estar aquí (Solución 1 de la revisión anterior)
   final ingredientesDeReceta = await (select(recetaIngredientes).join([
     innerJoin(ingredientes, recetaIngredientes.ingredienteId.equalsExp(ingredientes.id))
   ])
@@ -208,42 +257,72 @@ Future<void> venderRecetaTransaction(int recetaId) async {
       cantidadNecesaria: recIng.cantidadNecesaria,
     );
   }).get();
+  // -----------------------------------------------------------------------------------
 
-  // Ejecutar la lógica de venta dentro de una transacción para asegurar atomicidad
+  // Opcional: Obtener el nombre de la receta antes de la venta
+  final Receta? recetaVendida = await (select(recetas)..where((tbl) => tbl.id.equals(recetaId))).getSingleOrNull();
+
+  // 🔔 NUEVO: Lista para almacenar el consumo con los stocks finales correctos
+  final List<Map<String, dynamic>> consumoFinal = []; 
+
   await transaction(() async {
-    // 🟢 3. Condicional: Verificar Inventario antes de la venta
+    // 1. Condicional: Verificar Inventario (Lanza InsufficientStockException si falla)
     for (final info in ingredientesDeReceta) {
-      // **CORRECCIÓN 1: Convertir stock a double para la comparación**
       final double stockActual = info.ingrediente.cantidad.toDouble(); 
       final double cantidadRequerida = info.cantidadNecesaria;
-
       if (stockActual < cantidadRequerida) {
-        // ... (código de excepción sin cambios)
         throw InsufficientStockException(
             info.ingrediente.nombre, cantidadRequerida, stockActual);
       }
     }
 
-    // 🟢 2. Logica de Venta: Descontar los ingredientes del inventario
+    // 2. Logica de Venta: Descontar y Construir el Historial dentro del bucle
     for (final info in ingredientesDeReceta) {
-      // **CORRECCIÓN 2: Realizar la resta usando double y convertir el resultado de nuevo a int**
       final double stockActualDouble = info.ingrediente.cantidad.toDouble();
       final double nuevoStockDouble = stockActualDouble - info.cantidadNecesaria;
-      
-      // Convertir el resultado a entero (int) antes de escribirlo en la DB, 
-      // usando .round() si permites decimales en el inventario, o .toInt() si solo manejas unidades enteras. 
-      // Como tu columna es INT, usaremos .round() para manejar decimales en la resta.
-      final int nuevoStock = nuevoStockDouble.round(); // O .toInt() si no quieres redondear
+      final int nuevoStock = nuevoStockDouble.round();
+
+      // 🟢 CLAVE: Registrar el consumo ANTES de la actualización
+      consumoFinal.add({
+         'ingrediente': info.ingrediente.nombre,
+         'requerido': info.cantidadNecesaria,
+         'stock_antes': info.ingrediente.cantidad,
+         'stock_despues': nuevoStock, // Usamos el valor calculado
+      });
 
       // Actualizar la cantidad del ingrediente en la tabla 'Ingredientes'
       await (update(ingredientes)..where((t) => t.id.equals(info.ingrediente.id)))
           .write(IngredientesCompanion(
-            // El error de tipo está aquí (línea 218)
-            cantidad: Value(nuevoStock),
+             cantidad: Value(nuevoStock),
           ));
     }
+    
+    // 🟢 REGISTRO DE HISTORIAL (Venta de Receta) - Usando la lista consumoFinal
+    final String detallesJson = jsonEncode({
+        "receta": recetaVendida?.nombre ?? 'Desconocida',
+        "costo_produccion": recetaVendida?.costoTotal.toStringAsFixed(2),
+        "consumo_inventario": consumoFinal, // <--- USAMOS LA LISTA CORRECTA
+    });
+    
+    await insertTransaccion(TransaccionesCompanion.insert(
+      tipo: 'Venta',
+      entidad: 'Receta',
+      entidadId: Value(recetaId),
+      detalles: detallesJson,
+    ));
   });
 }
 
-  
+// 1. Inserción de una Transacción
+Future<int> insertTransaccion(TransaccionesCompanion transaccion) {
+  return into(transacciones).insert(transaccion);
+}
+
+Stream<List<Transaccione>> watchAllTransacciones() {
+  return (select(transacciones)
+        ..orderBy([(t) => OrderingTerm(expression: t.fechaHora, mode: OrderingMode.desc)]))
+      .watch();
+      }
+
+
 } 
