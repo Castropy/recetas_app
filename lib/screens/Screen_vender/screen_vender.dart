@@ -103,7 +103,7 @@ class _VenderButtonSection extends StatelessWidget {
      onPressed: isEnabled ? () => venderNotifier.venderRecetas(context) : null,
       icon: const Icon(Icons.point_of_sale),
       label: Text(
-            'Vender (${totalSeleccionadas} receta${totalSeleccionadas != 1 ? 's' : ''})', 
+            'Vender ($totalSeleccionadas receta${totalSeleccionadas != 1 ? 's' : ''})', 
             style: const TextStyle(fontSize: 18)
         ),
      style: ElevatedButton.styleFrom(
