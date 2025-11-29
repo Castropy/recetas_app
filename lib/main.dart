@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/receta_form_notifier.dart';
+import 'package:recetas_app/providers/search_notifier.dart';
 import 'package:recetas_app/providers/vender_notifier.dart';
 import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
 import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
@@ -34,8 +35,12 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => BottomNavBarProvider(),
         ),
+        
         ChangeNotifierProvider(
           create: (context) => FormVisibilityNotifier(),
+        ),
+        ChangeNotifierProvider( 
+         create: (context) => SearchNotifier(),
         ),
         ChangeNotifierProvider(
           create: (context) => InventarioFormNotifier(
