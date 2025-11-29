@@ -40,7 +40,7 @@ class PantallaPrincipal extends StatelessWidget {
           fontWeight: FontWeight.w900,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontSize: 16,
+          fontSize: 10,
           fontWeight: FontWeight.w900, // Tamaño de la etiqueta no seleccionada
         ),
         // 2. Usar el índice actual del Provider
