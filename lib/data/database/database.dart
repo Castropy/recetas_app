@@ -4,6 +4,8 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert';
+
+import 'package:recetas_app/providers/search_notifier.dart';
 part 'database.g.dart'; 
 
 
@@ -323,6 +325,44 @@ Stream<List<Transaccione>> watchAllTransacciones() {
         ..orderBy([(t) => OrderingTerm(expression: t.fechaHora, mode: OrderingMode.desc)]))
       .watch();
       }
+
+      // database.dart (dentro de la clase AppDatabase)
+
+Stream<List<Receta>> watchAllRecetasFiltered(String query, SearchFilter filter) {
+  // Construimos la consulta base
+  final baseQuery = select(recetas);
+  
+  // Si la consulta está vacía, retornamos todas las recetas sin filtrar.
+  if (query.isEmpty) {
+    return baseQuery.watch();
+  }
+
+  // Lógica de filtrado
+  Expression<bool> whereClause;
+  final normalizedQuery = '%${query.toLowerCase()}%';
+
+  switch (filter) {
+    case SearchFilter.nombre:
+      whereClause = recetas.nombre.lower().like(normalizedQuery);
+      break;
+
+    case SearchFilter.id:
+      // Intentamos parsear la consulta a entero. Si falla, usamos un ID -1 que no existe.
+      final int id = int.tryParse(query) ?? -1;
+      whereClause = recetas.id.equals(id);
+      break;
+
+    case SearchFilter.precio:
+      // Intentamos parsear la consulta a real (doble).
+      final double costo = double.tryParse(query) ?? -1.0;
+      // Buscamos costos totales mayores o iguales al valor ingresado
+      whereClause = recetas.costoTotal.isBiggerOrEqual(Constant( costo));
+      break;
+  }
+
+  // Ejecutamos y observamos la consulta con la cláusula WHERE aplicada
+  return (baseQuery..where((_) => whereClause)).watch();
+}
 
 
 } 
