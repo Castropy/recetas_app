@@ -29,7 +29,7 @@ class InventarioFormFields extends StatelessWidget {
         CustomTextFormField(
           onChanged: inventarioNotifier.updateCantidad,
           keyboardType: TextInputType.number,
-          hintText: 'Cantidad',
+          hintText: 'Ingresa la cantidad en GR o ML',
           prefixIcon: Icons.confirmation_number_rounded,
         ),
         const SizedBox(height: 10),
@@ -38,7 +38,7 @@ class InventarioFormFields extends StatelessWidget {
         CustomTextFormField(
           onChanged: inventarioNotifier.updatePrecio,
           keyboardType: TextInputType.number,
-          hintText: 'Precio', // Corregido de 'precio' a 'Precio'
+          hintText: 'Precio por KG o LT', // Corregido de 'precio' a 'Precio'
           prefixIcon: Icons.price_change_sharp,
         ),
         const SizedBox(height: 10),
