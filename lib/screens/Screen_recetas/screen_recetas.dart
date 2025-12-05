@@ -143,8 +143,9 @@ class ScreenRecetas extends StatelessWidget {
       ),
       // Botón para navegar al formulario de creación
       floatingActionButton: FloatingActionButton(
+        shape: StadiumBorder(),
         heroTag: 'addRecetaButton',
-        backgroundColor: theme.colorScheme.secondary,
+        backgroundColor: theme.colorScheme.primary,
         onPressed: () {
           // Navegar al formulario de creación de recetas
           Navigator.pushNamed(context, RecetaFormScreen.routeName);
