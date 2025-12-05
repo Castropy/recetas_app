@@ -76,6 +76,7 @@ class CustomSearchBar extends StatelessWidget {
                     color: isSelected ? Theme.of(context).primaryColor : Colors.black,
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    
                   ),
                 ),
               );
