@@ -10,13 +10,19 @@ import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/providers/botton_nav_provider.dart';
 import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 // 1. IMPORTAR LA BASE DE DATOS
 import 'data/database/database.dart'; // Asegúrate que esta ruta sea correcta 
 
-void main() {
+Future<void> main() async {
   // 2. Asegurarse que los bindings de Flutter estén inicializados
   //    antes de acceder a los directorios del sistema de archivos.
   WidgetsFlutterBinding.ensureInitialized(); 
+
+  // Inicializar datos de localización para español
+  await initializeDateFormatting('es', null);
 
   // 3. Crear una instancia de la base de datos.
   //    La instancia es una variable global o local para inyección.
@@ -79,6 +85,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       
+      supportedLocales: const [
+    Locale('es', ''), // Español
+    Locale('en', ''), // Inglés
+  ],
+  localizationsDelegates:  [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
 
       initialRoute: '/',
       routes: {
