@@ -10,17 +10,19 @@ class HistorialListView extends StatelessWidget {
   const HistorialListView({super.key, required this.transacciones});
 
   // Helper para generar el encabezado de la sección por día
-  String _getSectionTitle(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
+  String _getSectionTitle(BuildContext context, DateTime date) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final yesterday = today.subtract(const Duration(days: 1));
+  final transactionDate = DateTime(date.year, date.month, date.day);
 
-    if (transactionDate == today) return 'Hoy';
-    if (transactionDate == yesterday) return 'Ayer';
-    // Asegúrate de tener la configuración de localización de Flutter si usas 'es'
-    return DateFormat('EEEE, d MMM y', 'es').format(date); 
-  }
+  if (transactionDate == today) return 'Hoy';
+  if (transactionDate == yesterday) return 'Ayer';
+
+  final locale = Localizations.localeOf(context).toString(); // ej. es_VE, en_US
+  return DateFormat('EEEE, d MMM y', locale).format(date);
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class HistorialListView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 15.0, bottom: 8.0, left: 5),
                 child: Text(
-                  _getSectionTitle(transaccion.fechaHora),
+                  _getSectionTitle(context, transaccion.fechaHora),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
