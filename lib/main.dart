@@ -21,8 +21,11 @@ Future<void> main() async {
   //    antes de acceder a los directorios del sistema de archivos.
   WidgetsFlutterBinding.ensureInitialized(); 
 
-  // Inicializar datos de localización para español
-  await initializeDateFormatting('es', null);
+  // Detecta el locale del dispositivo (ej. es_VE, en_US, etc.)
+  final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale.toString();
+
+ // Inicializa los símbolos de intl para ese locale
+  await initializeDateFormatting(deviceLocale, null);
 
   // 3. Crear una instancia de la base de datos.
   //    La instancia es una variable global o local para inyección.
