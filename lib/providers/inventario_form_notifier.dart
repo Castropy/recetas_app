@@ -53,47 +53,45 @@ class InventarioFormNotifier extends ChangeNotifier {
 // ... (métodos loadIngredienteForEditing y clearForm)
 
   // 🟢 MODIFICACIÓN: guardarDatos para registrar Transacción
-void guardarDatos() async {
-  // ... (Validaciones existentes)
+Future<bool> guardarDatos() async {
   final nombreItem = nombre.trim();
   if (nombreItem.isEmpty) {
-    // Aquí puedes manejar una notificación de error o simplemente retornar
     debugPrint('Error: El nombre es obligatorio.');
-    return;
+    return false;
   }
-  
-  // 2. Parsar y validar cantidad (de String a Int)
+
   final cant = int.tryParse(cantidad);
   if (cant == null || cant < 0) {
     debugPrint('Error: La cantidad debe ser un número entero válido.');
-    return;
+    return false;
   }
-  
-  // 3. Parsar y validar precio (de String a Double)
+
   final prec = double.tryParse(precio);
   if (prec == null || prec < 0) {
     debugPrint('Error: El precio debe ser un número decimal válido.');
-    return;
+    return false;
   }
-  
+
   try {
     if (_editingIngredienteId != null) {
       // --- MODO EDICIÓN ---
-      final idToUpdate = _editingIngredienteId!; 
-      
+      final idToUpdate = _editingIngredienteId!;
+
       final ingredienteToUpdate = Ingrediente(
         id: idToUpdate,
-        nombre:  nombreItem,
+        nombre: nombreItem,
         cantidad: cant,
         costoUnitario: prec,
-        fechaCreacion: _ingredienteAntes!.fechaCreacion, // Usar la fecha original
+        fechaCreacion: _ingredienteAntes!.fechaCreacion,
       );
 
-      await db.updateIngrediente(ingredienteToUpdate); 
-      
-      // 🟢 REGISTRO DE HISTORIAL (Edición)
+      await db.updateIngrediente(ingredienteToUpdate);
+
       final String detallesJson = jsonEncode({
-        "antes": {"cant": _ingredienteAntes!.cantidad, "costo": _ingredienteAntes!.costoUnitario},
+        "antes": {
+          "cant": _ingredienteAntes!.cantidad,
+          "costo": _ingredienteAntes!.costoUnitario
+        },
         "despues": {"cant": cant, "costo": prec},
       });
 
@@ -103,7 +101,6 @@ void guardarDatos() async {
         entidadId: Value(idToUpdate),
         detalles: detallesJson,
       ));
-
     } else {
       // --- MODO INSERCIÓN ---
       final ingredienteCompanion = IngredientesCompanion.insert(
@@ -112,8 +109,7 @@ void guardarDatos() async {
         costoUnitario: prec,
       );
       final int newId = await db.insertIngrediente(ingredienteCompanion);
-      
-      // 🟢 REGISTRO DE HISTORIAL (Alta)
+
       await db.insertTransaccion(TransaccionesCompanion.insert(
         tipo: 'Alta',
         entidad: 'Ingrediente',
@@ -121,13 +117,16 @@ void guardarDatos() async {
         detalles: '{"cant": $cant, "costo": $prec}',
       ));
     }
-  
   } catch (e) {
     debugPrint('Error al guardar/actualizar ingrediente en DB: $e');
+    return false; // ❌ error en la operación
   }
-  _ingredienteAntes = null; // Limpiar estado anterior
+
+  _ingredienteAntes = null;
   clearForm();
+  return true; // ✅ guardado con éxito
 }
+
 
 Future<void> deleteIngredienteConHistorial(Ingrediente ingrediente) async {
   try {
