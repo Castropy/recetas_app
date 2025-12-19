@@ -125,14 +125,28 @@ class TransaccionCard extends StatelessWidget {
     }
     
     // Implementación de GENÉRICO (Alta, Eliminado, etc.)
-    return Column(
-      children: data.entries.map((entry) {
-        if (entry.key == 'consumo_inventario') return const SizedBox.shrink();
-        
-        String label = entry.key[0].toUpperCase() + entry.key.substring(1).replaceAll(RegExp(r'(?=[A-Z])'), ' ');
-        return _buildInfoRow(label, entry.value.toString(), null);
-      }).toList(),
-    );
+
+return Column(
+  children: data.entries.map((entry) {
+    if (entry.key == 'consumo_inventario') return const SizedBox.shrink();
+    
+    String label = entry.key[0].toUpperCase() +
+        entry.key.substring(1).replaceAll(RegExp(r'(?=[A-Z])'), ' ');
+    
+    String value = entry.value.toString();
+
+    // 🟢 Formatear costo con 2 decimales
+    if (entry.key.toLowerCase() == 'costo') {
+      final double? costo = double.tryParse(value);
+      if (costo != null) {
+        value = costo.toStringAsFixed(2);
+      }
+    }
+
+    return _buildInfoRow(label, value, null);
+  }).toList(),
+);
+
   }
 
   // --- Helpers de Diseño de Detalles ---
