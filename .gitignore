@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# 🔑 Keystore y configuración de firma
+*.jks
+*.keystore
+android/gradle.properties
