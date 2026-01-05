@@ -49,3 +49,6 @@ app.*.map.json
 *.jks
 *.keystore
 android/gradle.properties
+
+# Archivo con credenciales de firma
+android/key.properties
