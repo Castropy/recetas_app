@@ -29,15 +29,28 @@ Clona el repositorio y entra en la carpeta:
 ```bash
 git clone [https://github.com/Castropy/recetas_app.git](https://github.com/Castropy/recetas_app.git)
 cd recetas_app
-2. **Instala dependencias:¨**
-   ```bash
-   flutter pubget
-3. **Genera los archivos de Drift: Como este proyecto usa generación de código para la base de datos, ejecuta:**
-   ```bash
-   flutter pub run build_runner build --delete-conflicting-outputs
+ ```
 
-4. Corre la app
-   ```bash
-   flutter run
-   
+**##3. Instala dependencias**
+
+ Ejecuta el siguiente comando para descargar los paquetes necesarios:
+
+```bash
+flutter pub get
+ ```
+
+**###4. Generacion de codigo drift**
+
+Como este proyecto usa generación de código para la base de datos, debes ejecutar:
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+ ```
+
+**###5. Lanza la app**
+
+Ejecuta en consola:
+```bash
+flutter run
+ ```
+
    
