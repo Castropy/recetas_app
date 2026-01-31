@@ -1,6 +1,6 @@
 # 🍳 Recetas App
 
-Una solución integral para el control de costos de producción y gestión de inventario para negocios gastronómicos.
+Una solución movil para el control de costos de producción y gestión de inventario para negocios gastronómicos.
 
 ## 🚀 Características
 - **Inventario Inteligente:** Registro automático de entradas y salidas de insumos.
