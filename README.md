@@ -8,22 +8,27 @@ Una solución movil para el control de costos de producción y gestión de inven
 - **Reportes:** Generación de resúmenes de movimientos.
 - **Offline First:** Gracias a **Drift**, todos tus datos se almacenan localmente sin necesidad de internet.
 
-## 📸 Screenshots
+## 📸## 📸 Capturas de Pantalla
+
 | Pantalla Principal | Inventario | Reporte de Costos |
 | :---: | :---: | :---: |
-| ![Home](URL_![recetas_app](https://github.com/user-attachments/assets/f81f4ba6-5cdd-4a7f-bc14-4ad5dbc46cb8)
- | ![Inventory](     ![Screenshot_20260105_135702](https://github.com/user-attachments/assets/0ff0b08e-6b2e-44eb-93f5-fedaaffe19ef)
-     | ![Costs](URL_DE![Screenshot_20260105_135733](https://github.com/user-attachments/assets/54555c64-78e5-4816-a438-703390af5fbb)
-_TU_IM) |
+| <img src="https://github.com/user-attachments/assets/bdb5acd2-e2d6-4e67-b832-37a7dcd9ecb0" width="250"> | <img src="https://github.com/user-attachments/assets/112c0d90-f3c3-4b0e-b060-aeacef642c00" width="250"> | <img src="https://github.com/user-attachments/assets/82cb0d2b-b9f4-4e0f-af40-2c64524cabe9" width="250"> |
 
-## 🛠️ Instalación y Configuración
+---
 
-Sigue estos pasos para correr el proyecto localmente:
+## 🚀 Guía de Inicio Rápido
 
-1. **Clona el repositorio:**
-   ```bash
-   git clone [https://github.com/Castropy/recetas_app.git](https://github.com/Castropy/recetas_app.git)
+Para ejecutar este proyecto en tu máquina local, sigue estos pasos:
 
+### 1. Prerrequisitos
+* Tener instalado el SDK de [Flutter](https://docs.flutter.dev/get-started/install).
+* Un emulador o dispositivo físico conectado.
+
+### 2. Instalación
+Clona el repositorio y entra en la carpeta:
+```bash
+git clone [https://github.com/Castropy/recetas_app.git](https://github.com/Castropy/recetas_app.git)
+cd recetas_app
 2. **Instala dependencias:¨**
    ```bash
    flutter pubget
