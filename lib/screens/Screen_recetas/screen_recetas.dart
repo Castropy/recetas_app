@@ -21,7 +21,18 @@ class ScreenRecetas extends StatelessWidget {
     final searchNotifier = context.watch<SearchNotifier>();
 
     return Scaffold(
-      
+
+     appBar: AppBar(
+        title: const Text(
+          'Recetas',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 30,
+            color: Color.fromARGB(255, 45, 85, 216),
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Column( // 🟢 CAMBIO: Usamos Column para colocar la barra de búsqueda arriba
         children: [
           

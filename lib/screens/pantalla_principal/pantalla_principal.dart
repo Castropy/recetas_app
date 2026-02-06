@@ -15,16 +15,6 @@ class PantallaPrincipal extends StatelessWidget {
   Widget build(BuildContext context) {
     final navBarProvider = context.watch<BottomNavBarProvider>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Recetas App',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 30,
-            color:  Color.fromARGB(255, 45, 85, 216),
-            ),
-          ),
-      ), 
       // 1. Mostrar la pantalla correspondiente al índice actual
       body: _screens[navBarProvider.currentIndex], 
       
