@@ -31,8 +31,7 @@ class ScreenInventario extends StatelessWidget {
   Widget build(BuildContext context) {
     final inventarioNotifier = context.read<InventarioFormNotifier>();
     final db = context.read<AppDatabase>();
-    
-    // 🔴 SOLUCIÓN: Cambiamos 'watch' por 'read'. 
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -49,71 +48,90 @@ class ScreenInventario extends StatelessWidget {
       body: SafeArea(
         child: Consumer<FormVisibilityNotifier>(
           builder: (context, visibilityNotifier, child) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // 1. Formulario
-                  if (visibilityNotifier.isVisible)
-                    InventarioFormFields(inventarioNotifier: inventarioNotifier),
+            return Column(
+              children: [
+                // 1. Buscador fijo arriba (Consistencia con Screen Recetas)
+                const CustomSearchBar(),
 
-                  // 2. Botones de acción
-                  InventarioActionButtons(
-                    inventarioNotifier: inventarioNotifier,
-                    formVisibilityNotifier: visibilityNotifier,
-                  ),
+                // 2. Contenido con Scroll (Formulario + Lista)
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    children: [
+                      // Formulario dinámico
+                      if (visibilityNotifier.isVisible) ...[
+                        const SizedBox(height: 10),
+                        InventarioFormFields(inventarioNotifier: inventarioNotifier),
+                        const SizedBox(height: 10),
+                      ],
 
-                  // 🟢 COLOCAMOS EL BUSCADOR AQUÍ
-                  // Al no haber un 'watch' arriba, este widget es estable y no pierde el foco.
-                  const CustomSearchBar(),
+                      // Botones de acción (Agregar/Guardar/Cancelar)
+                      InventarioActionButtons(
+                        inventarioNotifier: inventarioNotifier,
+                        formVisibilityNotifier: visibilityNotifier,
+                      ),
 
-                  // 3. StreamBuilder con lista
-                  StreamBuilder<List<Ingrediente>>(
-                    stream: db.watchInventarioIngredientes(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                            child: Text('No hay ingredientes registrados.'));
-                      }
+                      const SizedBox(height: 15),
 
-                      final todos = snapshot.data!;
-
-                      // 🟢 SOLUCIÓN PARTE 2: Solo envolvemos la lista en el Consumer.
-                      // Así, cuando escribes, solo se reconstruye el filtrado, no toda la pantalla.
-                      return Consumer<SearchNotifier>(
-                        builder: (context, search, child) {
-                          final filtrados = todos
-                              .where((item) =>
-                                  _filterItem(item, search.query, search.filter))
-                              .toList();
-
-                          return Column(
-                            children: [
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.5,
-                                child: filtrados.isEmpty
-                                    ? Center(
-                                        child: Text(
-                                            'No se encontraron resultados para "${search.query}".'),
-                                      )
-                                    : IngredienteListView(
-                                        ingredientes: filtrados,
-                                        notifier: inventarioNotifier,
-                                        visibilityNotifier: visibilityNotifier,
-                                      ),
+                      // 3. StreamBuilder para la base de datos
+                      StreamBuilder<List<Ingrediente>>(
+                        stream: db.watchInventarioIngredientes(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: CircularProgressIndicator(),
                               ),
-                            ],
+                            );
+                          }
+                          
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 40),
+                                child: Text('No hay ingredientes registrados.'),
+                              ),
+                            );
+                          }
+
+                          final todos = snapshot.data!;
+
+                          // 🟢 Consumer local para filtrar sin reconstruir el Scaffold/Teclado
+                          return Consumer<SearchNotifier>(
+                            builder: (context, search, child) {
+                              final filtrados = todos
+                                  .where((item) => _filterItem(item, search.query, search.filter))
+                                  .toList();
+
+                              if (filtrados.isEmpty) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 40),
+                                    child: Text(
+                                      'No se hallaron resultados para "${search.query}"',
+                                      style: const TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // Llamada al widget de lista (ya corregido internamente)
+                              return IngredienteListView(
+                                ingredientes: filtrados,
+                                notifier: inventarioNotifier,
+                                visibilityNotifier: visibilityNotifier,
+                              );
+                            },
                           );
                         },
-                      );
-                    },
+                      ),
+                      // Espacio extra para que el teclado no tape el último elemento
+                      const SizedBox(height: 100), 
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
