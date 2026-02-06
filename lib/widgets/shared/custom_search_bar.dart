@@ -53,6 +53,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       child: Column(
         children: [
           TextField(
+            onTapOutside: (event) {
+             FocusScope.of(context).unfocus();
+            },
             controller: _controller, // 4. Usamos el controlador persistente
             decoration: InputDecoration(
               hintText: 'Buscar por ${filterNames[currentFilter]}...',
