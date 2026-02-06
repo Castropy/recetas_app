@@ -30,14 +30,11 @@ class ScreenInventario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inventarioNotifier = context.read<InventarioFormNotifier>();
-    final searchNotifier = context.watch<SearchNotifier>();
     final db = context.read<AppDatabase>();
-
-    final String currentQuery = searchNotifier.query;
-    final SearchFilter currentFilter = searchNotifier.filter;
-
+    
+    // 🔴 SOLUCIÓN: Cambiamos 'watch' por 'read'. 
     return Scaffold(
-      resizeToAvoidBottomInset: true, // ✅ se adapta al teclado
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text(
           'Inventario',
@@ -67,6 +64,10 @@ class ScreenInventario extends StatelessWidget {
                     formVisibilityNotifier: visibilityNotifier,
                   ),
 
+                  // 🟢 COLOCAMOS EL BUSCADOR AQUÍ
+                  // Al no haber un 'watch' arriba, este widget es estable y no pierde el foco.
+                  const CustomSearchBar(),
+
                   // 3. StreamBuilder con lista
                   StreamBuilder<List<Ingrediente>>(
                     stream: db.watchInventarioIngredientes(),
@@ -80,28 +81,34 @@ class ScreenInventario extends StatelessWidget {
                       }
 
                       final todos = snapshot.data!;
-                      final filtrados = todos
-                          .where((item) =>
-                              _filterItem(item, currentQuery, currentFilter))
-                          .toList();
 
-                      return Column(
-                        children: [
-                          if (todos.isNotEmpty) const CustomSearchBar(),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: filtrados.isEmpty
-                                ? Center(
-                                    child: Text(
-                                        'No se encontraron resultados para "$currentQuery".'),
-                                  )
-                                : IngredienteListView(
-                                    ingredientes: filtrados,
-                                    notifier: inventarioNotifier,
-                                    visibilityNotifier: visibilityNotifier,
-                                  ),
-                          ),
-                        ],
+                      // 🟢 SOLUCIÓN PARTE 2: Solo envolvemos la lista en el Consumer.
+                      // Así, cuando escribes, solo se reconstruye el filtrado, no toda la pantalla.
+                      return Consumer<SearchNotifier>(
+                        builder: (context, search, child) {
+                          final filtrados = todos
+                              .where((item) =>
+                                  _filterItem(item, search.query, search.filter))
+                              .toList();
+
+                          return Column(
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.5,
+                                child: filtrados.isEmpty
+                                    ? Center(
+                                        child: Text(
+                                            'No se encontraron resultados para "${search.query}".'),
+                                      )
+                                    : IngredienteListView(
+                                        ingredientes: filtrados,
+                                        notifier: inventarioNotifier,
+                                        visibilityNotifier: visibilityNotifier,
+                                      ),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                   ),
