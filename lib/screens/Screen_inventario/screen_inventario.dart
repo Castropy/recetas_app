@@ -45,12 +45,17 @@ class ScreenInventario extends StatelessWidget {
         ),
         centerTitle: true,
       ),
+      // 🟢 Implementación del FloatingActionButton para limpiar la interfaz
+      floatingActionButton: InventarioActionButtons(
+        inventarioNotifier: inventarioNotifier,
+        formVisibilityNotifier: context.watch<FormVisibilityNotifier>(),
+      ),
       body: SafeArea(
         child: Consumer<FormVisibilityNotifier>(
           builder: (context, visibilityNotifier, child) {
             return Column(
               children: [
-                // 1. Buscador fijo arriba (Consistencia con Screen Recetas)
+                // 1. Buscador fijo arriba
                 const CustomSearchBar(),
 
                 // 2. Contenido con Scroll (Formulario + Lista)
@@ -58,22 +63,16 @@ class ScreenInventario extends StatelessWidget {
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                     children: [
-                      // Formulario dinámico
+                      // Formulario dinámico: Solo aparece si isVisible es true
                       if (visibilityNotifier.isVisible) ...[
                         const SizedBox(height: 10),
                         InventarioFormFields(inventarioNotifier: inventarioNotifier),
                         const SizedBox(height: 10),
                       ],
 
-                      // Botones de acción (Agregar/Guardar/Cancelar)
-                      InventarioActionButtons(
-                        inventarioNotifier: inventarioNotifier,
-                        formVisibilityNotifier: visibilityNotifier,
-                      ),
-
                       const SizedBox(height: 15),
 
-                      // 3. StreamBuilder para la base de datos
+                      // 3. StreamBuilder para la visualización de datos en tiempo real
                       StreamBuilder<List<Ingrediente>>(
                         stream: db.watchInventarioIngredientes(),
                         builder: (context, snapshot) {
@@ -97,7 +96,7 @@ class ScreenInventario extends StatelessWidget {
 
                           final todos = snapshot.data!;
 
-                          // 🟢 Consumer local para filtrar sin reconstruir el Scaffold/Teclado
+                          // Filtrado reactivo mediante SearchNotifier
                           return Consumer<SearchNotifier>(
                             builder: (context, search, child) {
                               final filtrados = todos
@@ -116,7 +115,7 @@ class ScreenInventario extends StatelessWidget {
                                 );
                               }
 
-                              // Llamada al widget de lista (ya corregido internamente)
+                              // Lista de ingredientes optimizada
                               return IngredienteListView(
                                 ingredientes: filtrados,
                                 notifier: inventarioNotifier,
@@ -126,8 +125,8 @@ class ScreenInventario extends StatelessWidget {
                           );
                         },
                       ),
-                      // Espacio extra para que el teclado no tape el último elemento
-                      const SizedBox(height: 100), 
+                      // Espacio extra inferior para que el FAB no tape el último elemento
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
