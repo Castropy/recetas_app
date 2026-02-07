@@ -4,7 +4,6 @@ import 'package:recetas_app/widgets/shared/text_form_fields.dart';
 
 
 class InventarioFormFields extends StatelessWidget {
-  // Se requiere el Notifier para acceder a los controladores y actualizar el estado.
   final InventarioFormNotifier inventarioNotifier;
   
   const InventarioFormFields({
@@ -14,36 +13,73 @@ class InventarioFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String unidadActual = inventarioNotifier.unidadMedida;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Campo Nombre
         CustomTextFormField(
-          // 🟢 Vinculación con el controlador para carga automática
           controller: inventarioNotifier.nombreController,
           onChanged: inventarioNotifier.updateNombre,
-          hintText: 'Nombre',
+          hintText: 'Nombre del ingrediente',
           prefixIcon: Icons.dinner_dining,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
 
-        // 2. Campo Cantidad
+        // 🟢 2. Selector de Unidad de Medida (Mejorado visualmente)
+        const Text(
+          "Unidad de medida:",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity, // Forzamos a que use todo el ancho disponible
+          child: SegmentedButton<String>(
+            style: SegmentedButton.styleFrom(
+              backgroundColor: Colors.black26, // Fondo un poco más oscuro para contraste
+              selectedBackgroundColor: const Color.fromARGB(255, 45, 85, 216),
+              selectedForegroundColor: Colors.white,
+              foregroundColor: Colors.white, // 🟢 Texto blanco sólido para los no seleccionados
+              side: const BorderSide(color: Colors.white24),
+              // 🟢 Esto hace que los botones sean más compactos y quepan en la pantalla
+              visualDensity: VisualDensity.compact, 
+              padding: const EdgeInsets.symmetric(horizontal: 5), 
+              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+            segments: const [
+              ButtonSegment(value: 'g', label: Text('Gramos'), icon: Icon(Icons.scale, size: 18)),
+              ButtonSegment(value: 'ml', label: Text('Milis'), icon: Icon(Icons.water_drop, size: 18)),
+              ButtonSegment(value: 'und', label: Text('Unid.'), icon: Icon(Icons.numbers, size: 18)),
+            ],
+            selected: {unidadActual},
+            onSelectionChanged: (Set<String> newSelection) {
+              inventarioNotifier.updateUnidad(newSelection.first);
+            },
+          ),
+        ),
+        const SizedBox(height: 15),
+
+        // 3. Campo Cantidad
         CustomTextFormField(
-          // 🟢 Vinculación con el controlador para carga automática
           controller: inventarioNotifier.cantidadController,
           onChanged: inventarioNotifier.updateCantidad,
-          keyboardType: TextInputType.number,
-          hintText: 'Ingresa la cantidad en GR o ML',
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          hintText: unidadActual == 'und' 
+              ? '¿Cuántas unidades vienen?' 
+              : 'Cantidad total (GR o ML)',
           prefixIcon: Icons.confirmation_number_rounded,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         
-        // 3. Campo Precio
+        // 4. Campo Precio
         CustomTextFormField(
-          // 🟢 Vinculación con el controlador para carga automática
           controller: inventarioNotifier.precioController,
           onChanged: inventarioNotifier.updatePrecio,
-          keyboardType: TextInputType.number,
-          hintText: 'Precio por KG o LT', 
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          hintText: unidadActual == 'und' 
+              ? 'Precio total por todas las unidades' 
+              : 'Precio por KG o LT', 
           prefixIcon: Icons.price_change_sharp,
         ),
         const SizedBox(height: 10),

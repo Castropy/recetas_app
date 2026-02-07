@@ -29,6 +29,7 @@ class ScreenInventario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Usamos read para acciones puntuales, pero Consumer para la UI reactiva
     final inventarioNotifier = context.read<InventarioFormNotifier>();
     final db = context.read<AppDatabase>();
 
@@ -45,7 +46,7 @@ class ScreenInventario extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      // 🟢 Implementación del FloatingActionButton para limpiar la interfaz
+      // Botones de acción (Guardar/Cerrar)
       floatingActionButton: InventarioActionButtons(
         inventarioNotifier: inventarioNotifier,
         formVisibilityNotifier: context.watch<FormVisibilityNotifier>(),
@@ -63,16 +64,23 @@ class ScreenInventario extends StatelessWidget {
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                     children: [
-                      // Formulario dinámico: Solo aparece si isVisible es true
+                      // Formulario dinámico
                       if (visibilityNotifier.isVisible) ...[
                         const SizedBox(height: 10),
-                        InventarioFormFields(inventarioNotifier: inventarioNotifier),
+                        
+                        // 🟢 CLAVE: Consumer para que el formulario reaccione al cambio de unidad
+                        Consumer<InventarioFormNotifier>(
+                          builder: (context, notifier, child) {
+                            return InventarioFormFields(inventarioNotifier: notifier);
+                          },
+                        ),
+                        
                         const SizedBox(height: 10),
                       ],
 
                       const SizedBox(height: 15),
 
-                      // 3. StreamBuilder para la visualización de datos en tiempo real
+                      // 3. Lista de ingredientes desde la DB
                       StreamBuilder<List<Ingrediente>>(
                         stream: db.watchInventarioIngredientes(),
                         builder: (context, snapshot) {
@@ -115,7 +123,6 @@ class ScreenInventario extends StatelessWidget {
                                 );
                               }
 
-                              // Lista de ingredientes optimizada
                               return IngredienteListView(
                                 ingredientes: filtrados,
                                 notifier: inventarioNotifier,
@@ -125,7 +132,7 @@ class ScreenInventario extends StatelessWidget {
                           );
                         },
                       ),
-                      // Espacio extra inferior para que el FAB no tape el último elemento
+                      // Espacio extra inferior
                       const SizedBox(height: 100),
                     ],
                   ),

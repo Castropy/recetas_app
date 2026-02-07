@@ -166,6 +166,9 @@ class _IngredienteSelector extends StatelessWidget {
  // y lo dividimos por 1000 para obtener el costo por unidad de receta (gramo).
      precioUnitario: ingrediente.costoUnitario / 1000.0, 
      cantidadNecesaria: 0,
+     stockInventario: ingrediente.cantidad, // 🟢 Requerido
+     unidadMedida: ingrediente.unidadMedida,
+     
   )
     );
     
@@ -206,6 +209,8 @@ class _IngredienteSelector extends StatelessWidget {
                 // y lo dividimos por 1000 para obtener el costo por unidad de receta (gramo).
                  precioUnitario: ingrediente.costoUnitario / 1000.0,
                  cantidadNecesaria: cantidad,
+                 stockInventario: ingrediente.cantidad, // 🟢 Requerido
+                 unidadMedida: ingrediente.unidadMedida,
         );
                   notifier.addIngredient(newItem);
                   Navigator.of(context).pop();
@@ -272,7 +277,9 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
                 nombre: item.nombre, 
                 // Estos valores son simulados, solo se necesita el ID y nombre para el diálogo
                 cantidad: 1, 
-                costoUnitario: item.precioUnitario, 
+                costoUnitario: item.precioUnitario,
+                 // 🟢 Requerido
+                 unidadMedida: item.unidadMedida, 
                 fechaCreacion: DateTime.now()
               );
               

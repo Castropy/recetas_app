@@ -1,38 +1,34 @@
-
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/models/recipe_ingredient_model.dart';
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 
-
-// Notifier que gestiona el estado temporal para crear o editar una Receta
- 
 class RecetaFormNotifier extends ChangeNotifier {
   final AppDatabase db;
   RecetaFormNotifier({required this.db});
 
   // --- Estado del Formulario ---
-  //  Almacena el ID de la receta que se está editando
   int? _idReceta; 
   String _nombre = '';
   List<RecipeIngredientModel> _ingredientesSeleccionados = [];
 
-  // Getter para acceder al ID (indica si estamos editando)
+  // Getters
   int? get idReceta => _idReceta; 
   String get nombre => _nombre;
   List<RecipeIngredientModel> get ingredientesSeleccionados => _ingredientesSeleccionados;
 
+  // 🟢 El costo total ahora es dinámico y exacto basado en el modelo
   double get costoTotal {
-  return _ingredientesSeleccionados.fold(0.0, (sum, item) => sum + item.costoSubtotal);
-} 
+    return _ingredientesSeleccionados.fold(0.0, (sum, item) => sum + item.costoSubtotal);
+  } 
 
   void updateNombre(String value) {
     _nombre = value;
     notifyListeners();
   }
 
- void addIngredient(RecipeIngredientModel item) {
+  void addIngredient(RecipeIngredientModel item) {
     final existingIndex = _ingredientesSeleccionados.indexWhere((i) => i.ingredienteId == item.ingredienteId);
     
     if (existingIndex >= 0) {
@@ -54,101 +50,80 @@ class RecetaFormNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  
-  
-  // ... (costoTotal, updateNombre, addIngredient, removeIngredient, watchInventarioIngredientes)
+  // 🟢 CARGA DE RECETA (Modo Edición) corregido para manejar unidades
+  Future<void> loadRecetaToEdit(int id) async {
+    if (_idReceta == id) return; 
 
- // 🟢 Nuevo: Limpia y Carga la Receta Existente (Modo Edición)
-Future<void> loadRecetaToEdit(int id) async {
-  // Si ya estamos editando esta misma receta, no hacemos nada.
-  if (_idReceta == id) return; 
+    clearForm(); 
 
-  clearForm(); // Limpia el estado actual antes de cargar
+    final detailsMap = await db.getRecetaDetails(id);
+    
+    if (detailsMap.isEmpty) {
+      debugPrint('Error: Receta con ID $id no encontrada.');
+      return;
+    }
+    
+    final MapEntry<Receta, List<RecetaIngrediente>> entry = detailsMap.entries.first;
+    final Receta receta = entry.key;
+    final List<RecetaIngrediente> ingredientesDB = entry.value;
 
-  // 1. Obtener la Receta principal y sus entradas de unión (RecetaIngrediente)
-  final detailsMap = await db.getRecetaDetails(id);
-  
-  if (detailsMap.isEmpty) {
-    debugPrint('Error: Receta con ID $id no encontrada.');
-    return;
+    _idReceta = receta.id;
+    _nombre = receta.nombre;
+
+    final List<int> idsNecesarios = ingredientesDB.map((ri) => ri.ingredienteId).toList();
+    final List<Ingrediente> inventarioIngredientes = await db.getIngredientesByIds(idsNecesarios);
+
+    final Map<int, Ingrediente> ingredienteMap = {
+      for (var item in inventarioIngredientes) item.id: item
+    };
+
+    _ingredientesSeleccionados = ingredientesDB.map((ri) {
+      final ingrediente = ingredienteMap[ri.ingredienteId];
+      
+      if (ingrediente == null) {
+        debugPrint('Advertencia: Ingrediente ID ${ri.ingredienteId} no encontrado.');
+        return null;
+      }
+
+      // 🟢 ASIGNACIÓN CORRECTA: Pasamos los datos puros al modelo.
+      // Ya NO dividimos entre 1000 aquí. El RecipeIngredientModel detectará
+      // si es 'und', 'g' o 'ml' y aplicará la fórmula correcta.
+      return RecipeIngredientModel(
+        ingredienteId: ri.ingredienteId,
+        nombre: ingrediente.nombre,
+        precioUnitario: ingrediente.costoUnitario,
+        cantidadNecesaria: ri.cantidadNecesaria,
+        stockInventario: ingrediente.cantidad,     // Nueva propiedad necesaria
+        unidadMedida: ingrediente.unidadMedida,    // Nueva propiedad necesaria
+      );
+    }).whereType<RecipeIngredientModel>().toList();
+
+    notifyListeners();
   }
   
-  final MapEntry<Receta, List<RecetaIngrediente>> entry = detailsMap.entries.first;
-  final Receta receta = entry.key;
-  final List<RecetaIngrediente> ingredientesDB = entry.value;
-
-  // A. Actualizar el ID y Nombre de la Receta
-  _idReceta = receta.id;
-  _nombre = receta.nombre;
-
-  // 2. Optimización: Obtener todos los objetos Ingrediente (Nombres y Precios Unitarios)
-  final List<int> idsNecesarios = ingredientesDB.map((ri) => ri.ingredienteId).toList();
-  // 🟢 Usamos la consulta optimizada por lote (JOIN/IN)
-  final List<Ingrediente> inventarioIngredientes = await db.getIngredientesByIds(idsNecesarios);
-
-  // 3. Crear un mapa para acceso rápido O(1)
-  final Map<int, Ingrediente> ingredienteMap = {
-    for (var item in inventarioIngredientes) item.id: item
-  };
-
-  // 4. Transformar los datos de la DB a Modelos de Receta
-  _ingredientesSeleccionados = ingredientesDB.map((ri) {
-  final ingrediente = ingredienteMap[ri.ingredienteId];
- 
-  if (ingrediente == null) {
-   debugPrint('Advertencia: Ingrediente ID ${ri.ingredienteId} no encontrado en el inventario.');
-   return null;
-    }
- 
-   // 🟢 CORRECCIÓN CLAVE DE UNIDAD: Divide el costo por 1000.
-  final double costoUnitarioGuardado = ingrediente.costoUnitario;
- // Si el costo guardado es por 1000 unidades (ej. $1 por Kg)
- // El costo real por unidad (gramo) es 1/1000.
-   final double costoPorUnidadReceta = costoUnitarioGuardado / 1000.0; // <-- APLICAR DIVISIÓN
-
-  return RecipeIngredientModel(
-   ingredienteId: ri.ingredienteId,
-   nombre: ingrediente.nombre,
-  // Usa el costo por unidad de receta corregido.
-   precioUnitario: costoPorUnidadReceta, 
-   cantidadNecesaria: ri.cantidadNecesaria,
-  );
-  }).whereType<RecipeIngredientModel>().toList(); // Filtramos cualquier elemento nulo
-
-  notifyListeners();
-}
-  
-  // 3. Modificación de clearForm para resetear el ID
   void clearForm() {
-    _idReceta = null; // 🟢 Resetear el ID al limpiar
+    _idReceta = null;
     _nombre = '';
     _ingredientesSeleccionados = [];
     notifyListeners();
   }
 
-  // 4. 🟢 Modificación: Ahora maneja Inserción Y Actualización
+  // 🟢 PERSISTENCIA: Guardar Receta
   Future<void> guardarReceta(BuildContext context) async {
     final nombreReceta = _nombre.trim();
     if (nombreReceta.isEmpty || _ingredientesSeleccionados.isEmpty) {
-      // ... (Mostrar SnackBar de error)
       if (context.mounted) {
           NotificacionSnackBar.mostrarSnackBar(context, 'Debe ingresar un nombre y seleccionar ingredientes.');
       }
       return;
     }
     
-    // 🔔 Lógica de Actualización: Si existe el ID, llamamos a la DB para actualizar
     if (_idReceta != null) {
         await _actualizarReceta(context, nombreReceta);
         return;
     }
 
-    // 🔔 Lógica de Inserción: Si _idReceta es null, procedemos a insertar (lógica existente)
-    // ... (Tu código de inserción actual aquí)
-
     try {
-      // ... (Código para crear recetaCompanion y ingredientesCompanion)
-      
       final recetaCompanion = RecetasCompanion.insert(
         nombre: nombreReceta,
         costoTotal: costoTotal,
@@ -164,11 +139,9 @@ Future<void> loadRecetaToEdit(int id) async {
 
       await db.saveRecetaTransaction(recetaCompanion, ingredientesCompanion);
       
-      // ... (Limpiar y notificar - Inserción)
-      final savedName = nombreReceta;
       clearForm();
       if (context.mounted) {
-        NotificacionSnackBar.mostrarSnackBar(context, 'Receta "$savedName" creada con éxito!');
+        NotificacionSnackBar.mostrarSnackBar(context, 'Receta "$nombreReceta" creada con éxito!');
         Navigator.of(context).pop(); 
       }
 
@@ -180,34 +153,28 @@ Future<void> loadRecetaToEdit(int id) async {
     }
   }
 
-  // 5. 🟢 Nuevo: Implementación de la Actualización
+  // 🟢 ACTUALIZACIÓN
   Future<void> _actualizarReceta(BuildContext context, String nombreReceta) async {
-    if (_idReceta == null) return; // Seguridad
+    if (_idReceta == null) return;
 
     try {
-      // 1. Crear el Companion de la Receta principal (para UPDATE)
       final recetaCompanion = Receta(
-        id: _idReceta!, // Usamos el ID existente
+        id: _idReceta!,
         nombre: nombreReceta,
         costoTotal: costoTotal,
-        fechaCreacion: DateTime.now(), // La fecha de creación la puedes mantener o actualizar
+        fechaCreacion: DateTime.now(), 
       );
 
-      // 2. Crear los Companion de la tabla de unión (RecetaIngredientes)
       final ingredientesCompanion = _ingredientesSeleccionados.map((item) {
-        // En este punto, no se requiere el RecetaId en el Companion porque 
-        // la función de actualización de DB lo manejará.
         return RecetaIngredientesCompanion(
-          recetaId: Value(_idReceta!), // Importante: Inyectamos el ID existente
+          recetaId: Value(_idReceta!),
           ingredienteId: Value(item.ingredienteId),
           cantidadNecesaria: Value(item.cantidadNecesaria),
         );
       }).toList();
 
-      // 3. Llamar a una nueva transacción de actualización en la DB (a implementar)
       await db.updateRecetaTransaction(recetaCompanion, ingredientesCompanion);
 
-      // 4. Limpiar y notificar
       clearForm();
       if (context.mounted) {
         NotificacionSnackBar.mostrarSnackBar(context, 'Receta "$nombreReceta" actualizada con éxito!');
@@ -221,22 +188,21 @@ Future<void> loadRecetaToEdit(int id) async {
       debugPrint('Error al actualizar la receta en DB: $e');
     }
   }
+
   Stream<List<Ingrediente>> watchInventarioIngredientes() {
     return db.watchInventarioIngredientes();
   }
 
-// 🟢 NUEVO HELPER: Transforma Ingrediente de DB a Modelo de UI con corrección de costo
+  // 🟢 HELPER DE UI: Transforma Ingrediente de DB a Modelo de UI
   RecipeIngredientModel createModelFromIngrediente(Ingrediente ingrediente) {
- // Aplicamos la misma corrección de unidad aquí
-   final double costoUnitarioGuardado = ingrediente.costoUnitario;
-   final double costoPorUnidadReceta = costoUnitarioGuardado / 1000.0; // <-- APLICAR DIVISIÓN
-
-   return RecipeIngredientModel(
-    ingredienteId: ingrediente.id,
-    nombre: ingrediente.nombre,
-    precioUnitario: costoPorUnidadReceta,
-    cantidadNecesaria: 0, // Se inicializa en 0 y se ajusta en la UI
-   );
+    // Al añadir un ingrediente nuevo, inyectamos sus metadatos de unidad y stock
+    return RecipeIngredientModel(
+      ingredienteId: ingrediente.id,
+      nombre: ingrediente.nombre,
+      precioUnitario: ingrediente.costoUnitario,
+      cantidadNecesaria: 0, 
+      stockInventario: ingrediente.cantidad, 
+      unidadMedida: ingrediente.unidadMedida,
+    );
   }
-  // ... (Helper para la UI de Selección de Ingredientes: watchInventarioIngredientes)
 }

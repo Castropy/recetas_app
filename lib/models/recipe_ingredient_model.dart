@@ -1,12 +1,22 @@
 class RecipeIngredientModel {
+  // ID del Ingrediente existente en la tabla 'Ingredientes'
   final int ingredienteId; 
-  final String nombre; 
-  final double precioUnitario; // El precio registrado en inventario (ej: $6.0)
-  final double cantidadNecesaria; // Lo que pide la receta (ej: 2.0 huevos)
   
-  // 🟢 NUEVOS CAMPOS:
-  final double stockInventario; // Cuánto venía por ese precio (ej: 30.0 piezas)
-  final String unidadMedida;    // 'g', 'ml' o 'und'
+  // Nombre del ingrediente (para mostrar en la UI)
+  final String nombre; 
+  
+  // 🟢 IMPORTANTE: Este precio ya viene "masticado" desde la DB.
+  // Es el costo de 1 sola unidad (1g, 1ml o 1 huevo).
+  final double precioUnitario; 
+  
+  // Cantidad necesaria para la receta (Ej: 5.0 huevos o 500.0 gramos)
+  final double cantidadNecesaria; 
+
+  // Cantidad total disponible en el inventario
+  final double stockInventario; 
+
+  // Unidad de medida ('g', 'ml', 'und')
+  final String unidadMedida;
 
   RecipeIngredientModel({
     required this.ingredienteId,
@@ -17,20 +27,12 @@ class RecipeIngredientModel {
     required this.unidadMedida,
   });
 
-  // 🟢 LÓGICA CORREGIDA PARA EL CÁLCULO
-  double get costoSubtotal {
-    // Caso 1: Si el ingrediente se maneja por UNIDADES (como los huevos)
-    if (unidadMedida == 'und') {
-      // Fórmula: (Precio Total / Cantidad del empaque) * Unidades usadas
-      // Ejemplo: ($6.0 / 30) * 2 = $0.40
-      return (precioUnitario / stockInventario) * cantidadNecesaria;
-    } 
-    
-    // Caso 2: Si el ingrediente se maneja por PESO o VOLUMEN (Gramos o Mililitros)
-    else {
-      // Fórmula: (Precio por KG o LT / 1000) * Cantidad usada
-      // Ejemplo Harina: ($2.0 / 1000) * 500g = $1.0
-      return (precioUnitario / 1000) * cantidadNecesaria;
-    }
-  }
+  // 🟢 CÁLCULO DIRECTO Y SIN ERRORES:
+  // Como precioUnitario es el costo de UNA unidad, simplemente multiplicamos.
+  // Ejemplo Huevo: 5 (cantidad) * 0.20 (precio base) = $1.00
+  // Ejemplo Harina: 500 (gramos) * 0.00122 (precio base) = $0.61
+  double get costoSubtotal => precioUnitario * cantidadNecesaria;
+
+  // Getter para mostrar el costo con 2 decimales en la UI
+  String get costoFormateado => costoSubtotal.toStringAsFixed(2);
 }

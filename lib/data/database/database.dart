@@ -307,7 +307,7 @@ Future<void> venderRecetaTransaction(int recetaId) async {
       // Actualizar la cantidad del ingrediente en la tabla 'Ingredientes'
       await (update(ingredientes)..where((t) => t.id.equals(info.ingrediente.id)))
           .write(IngredientesCompanion(
-             cantidad: Value(nuevoStock),
+             cantidad: Value(nuevoStock.toDouble()),
           ));
     }
     
