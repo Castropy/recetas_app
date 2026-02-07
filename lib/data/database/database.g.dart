@@ -29,15 +29,23 @@ class $IngredientesTable extends Ingredientes
   static const VerificationMeta _cantidadMeta =
       const VerificationMeta('cantidad');
   @override
-  late final GeneratedColumn<int> cantidad = GeneratedColumn<int>(
+  late final GeneratedColumn<double> cantidad = GeneratedColumn<double>(
       'cantidad', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.double, requiredDuringInsert: true);
   static const VerificationMeta _costoUnitarioMeta =
       const VerificationMeta('costoUnitario');
   @override
   late final GeneratedColumn<double> costoUnitario = GeneratedColumn<double>(
       'costo_unitario', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _unidadMedidaMeta =
+      const VerificationMeta('unidadMedida');
+  @override
+  late final GeneratedColumn<String> unidadMedida = GeneratedColumn<String>(
+      'unidad_medida', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('g'));
   static const VerificationMeta _fechaCreacionMeta =
       const VerificationMeta('fechaCreacion');
   @override
@@ -48,7 +56,7 @@ class $IngredientesTable extends Ingredientes
           defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, nombre, cantidad, costoUnitario, fechaCreacion];
+      [id, nombre, cantidad, costoUnitario, unidadMedida, fechaCreacion];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -82,6 +90,12 @@ class $IngredientesTable extends Ingredientes
     } else if (isInserting) {
       context.missing(_costoUnitarioMeta);
     }
+    if (data.containsKey('unidad_medida')) {
+      context.handle(
+          _unidadMedidaMeta,
+          unidadMedida.isAcceptableOrUnknown(
+              data['unidad_medida']!, _unidadMedidaMeta));
+    }
     if (data.containsKey('fecha_creacion')) {
       context.handle(
           _fechaCreacionMeta,
@@ -102,9 +116,11 @@ class $IngredientesTable extends Ingredientes
       nombre: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}nombre'])!,
       cantidad: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}cantidad'])!,
+          .read(DriftSqlType.double, data['${effectivePrefix}cantidad'])!,
       costoUnitario: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}costo_unitario'])!,
+      unidadMedida: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unidad_medida'])!,
       fechaCreacion: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}fecha_creacion'])!,
     );
@@ -119,22 +135,25 @@ class $IngredientesTable extends Ingredientes
 class Ingrediente extends DataClass implements Insertable<Ingrediente> {
   final int id;
   final String nombre;
-  final int cantidad;
+  final double cantidad;
   final double costoUnitario;
+  final String unidadMedida;
   final DateTime fechaCreacion;
   const Ingrediente(
       {required this.id,
       required this.nombre,
       required this.cantidad,
       required this.costoUnitario,
+      required this.unidadMedida,
       required this.fechaCreacion});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nombre'] = Variable<String>(nombre);
-    map['cantidad'] = Variable<int>(cantidad);
+    map['cantidad'] = Variable<double>(cantidad);
     map['costo_unitario'] = Variable<double>(costoUnitario);
+    map['unidad_medida'] = Variable<String>(unidadMedida);
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     return map;
   }
@@ -145,6 +164,7 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       nombre: Value(nombre),
       cantidad: Value(cantidad),
       costoUnitario: Value(costoUnitario),
+      unidadMedida: Value(unidadMedida),
       fechaCreacion: Value(fechaCreacion),
     );
   }
@@ -155,8 +175,9 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return Ingrediente(
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
-      cantidad: serializer.fromJson<int>(json['cantidad']),
+      cantidad: serializer.fromJson<double>(json['cantidad']),
       costoUnitario: serializer.fromJson<double>(json['costoUnitario']),
+      unidadMedida: serializer.fromJson<String>(json['unidadMedida']),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
     );
   }
@@ -166,8 +187,9 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
-      'cantidad': serializer.toJson<int>(cantidad),
+      'cantidad': serializer.toJson<double>(cantidad),
       'costoUnitario': serializer.toJson<double>(costoUnitario),
+      'unidadMedida': serializer.toJson<String>(unidadMedida),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
     };
   }
@@ -175,14 +197,16 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
   Ingrediente copyWith(
           {int? id,
           String? nombre,
-          int? cantidad,
+          double? cantidad,
           double? costoUnitario,
+          String? unidadMedida,
           DateTime? fechaCreacion}) =>
       Ingrediente(
         id: id ?? this.id,
         nombre: nombre ?? this.nombre,
         cantidad: cantidad ?? this.cantidad,
         costoUnitario: costoUnitario ?? this.costoUnitario,
+        unidadMedida: unidadMedida ?? this.unidadMedida,
         fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       );
   Ingrediente copyWithCompanion(IngredientesCompanion data) {
@@ -193,6 +217,9 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
       costoUnitario: data.costoUnitario.present
           ? data.costoUnitario.value
           : this.costoUnitario,
+      unidadMedida: data.unidadMedida.present
+          ? data.unidadMedida.value
+          : this.unidadMedida,
       fechaCreacion: data.fechaCreacion.present
           ? data.fechaCreacion.value
           : this.fechaCreacion,
@@ -206,14 +233,15 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
           ..write('nombre: $nombre, ')
           ..write('cantidad: $cantidad, ')
           ..write('costoUnitario: $costoUnitario, ')
+          ..write('unidadMedida: $unidadMedida, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nombre, cantidad, costoUnitario, fechaCreacion);
+  int get hashCode => Object.hash(
+      id, nombre, cantidad, costoUnitario, unidadMedida, fechaCreacion);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -222,27 +250,31 @@ class Ingrediente extends DataClass implements Insertable<Ingrediente> {
           other.nombre == this.nombre &&
           other.cantidad == this.cantidad &&
           other.costoUnitario == this.costoUnitario &&
+          other.unidadMedida == this.unidadMedida &&
           other.fechaCreacion == this.fechaCreacion);
 }
 
 class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   final Value<int> id;
   final Value<String> nombre;
-  final Value<int> cantidad;
+  final Value<double> cantidad;
   final Value<double> costoUnitario;
+  final Value<String> unidadMedida;
   final Value<DateTime> fechaCreacion;
   const IngredientesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.cantidad = const Value.absent(),
     this.costoUnitario = const Value.absent(),
+    this.unidadMedida = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   });
   IngredientesCompanion.insert({
     this.id = const Value.absent(),
     required String nombre,
-    required int cantidad,
+    required double cantidad,
     required double costoUnitario,
+    this.unidadMedida = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   })  : nombre = Value(nombre),
         cantidad = Value(cantidad),
@@ -250,8 +282,9 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   static Insertable<Ingrediente> custom({
     Expression<int>? id,
     Expression<String>? nombre,
-    Expression<int>? cantidad,
+    Expression<double>? cantidad,
     Expression<double>? costoUnitario,
+    Expression<String>? unidadMedida,
     Expression<DateTime>? fechaCreacion,
   }) {
     return RawValuesInsertable({
@@ -259,6 +292,7 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
       if (nombre != null) 'nombre': nombre,
       if (cantidad != null) 'cantidad': cantidad,
       if (costoUnitario != null) 'costo_unitario': costoUnitario,
+      if (unidadMedida != null) 'unidad_medida': unidadMedida,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
     });
   }
@@ -266,14 +300,16 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
   IngredientesCompanion copyWith(
       {Value<int>? id,
       Value<String>? nombre,
-      Value<int>? cantidad,
+      Value<double>? cantidad,
       Value<double>? costoUnitario,
+      Value<String>? unidadMedida,
       Value<DateTime>? fechaCreacion}) {
     return IngredientesCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       cantidad: cantidad ?? this.cantidad,
       costoUnitario: costoUnitario ?? this.costoUnitario,
+      unidadMedida: unidadMedida ?? this.unidadMedida,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     );
   }
@@ -288,10 +324,13 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
       map['nombre'] = Variable<String>(nombre.value);
     }
     if (cantidad.present) {
-      map['cantidad'] = Variable<int>(cantidad.value);
+      map['cantidad'] = Variable<double>(cantidad.value);
     }
     if (costoUnitario.present) {
       map['costo_unitario'] = Variable<double>(costoUnitario.value);
+    }
+    if (unidadMedida.present) {
+      map['unidad_medida'] = Variable<String>(unidadMedida.value);
     }
     if (fechaCreacion.present) {
       map['fecha_creacion'] = Variable<DateTime>(fechaCreacion.value);
@@ -306,6 +345,7 @@ class IngredientesCompanion extends UpdateCompanion<Ingrediente> {
           ..write('nombre: $nombre, ')
           ..write('cantidad: $cantidad, ')
           ..write('costoUnitario: $costoUnitario, ')
+          ..write('unidadMedida: $unidadMedida, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
@@ -1190,16 +1230,18 @@ typedef $$IngredientesTableCreateCompanionBuilder = IngredientesCompanion
     Function({
   Value<int> id,
   required String nombre,
-  required int cantidad,
+  required double cantidad,
   required double costoUnitario,
+  Value<String> unidadMedida,
   Value<DateTime> fechaCreacion,
 });
 typedef $$IngredientesTableUpdateCompanionBuilder = IngredientesCompanion
     Function({
   Value<int> id,
   Value<String> nombre,
-  Value<int> cantidad,
+  Value<double> cantidad,
   Value<double> costoUnitario,
+  Value<String> unidadMedida,
   Value<DateTime> fechaCreacion,
 });
 
@@ -1240,11 +1282,14 @@ class $$IngredientesTableFilterComposer
   ColumnFilters<String> get nombre => $composableBuilder(
       column: $table.nombre, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get cantidad => $composableBuilder(
+  ColumnFilters<double> get cantidad => $composableBuilder(
       column: $table.cantidad, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get costoUnitario => $composableBuilder(
       column: $table.costoUnitario, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unidadMedida => $composableBuilder(
+      column: $table.unidadMedida, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get fechaCreacion => $composableBuilder(
       column: $table.fechaCreacion, builder: (column) => ColumnFilters(column));
@@ -1286,11 +1331,15 @@ class $$IngredientesTableOrderingComposer
   ColumnOrderings<String> get nombre => $composableBuilder(
       column: $table.nombre, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get cantidad => $composableBuilder(
+  ColumnOrderings<double> get cantidad => $composableBuilder(
       column: $table.cantidad, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<double> get costoUnitario => $composableBuilder(
       column: $table.costoUnitario,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unidadMedida => $composableBuilder(
+      column: $table.unidadMedida,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get fechaCreacion => $composableBuilder(
@@ -1313,11 +1362,14 @@ class $$IngredientesTableAnnotationComposer
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
 
-  GeneratedColumn<int> get cantidad =>
+  GeneratedColumn<double> get cantidad =>
       $composableBuilder(column: $table.cantidad, builder: (column) => column);
 
   GeneratedColumn<double> get costoUnitario => $composableBuilder(
       column: $table.costoUnitario, builder: (column) => column);
+
+  GeneratedColumn<String> get unidadMedida => $composableBuilder(
+      column: $table.unidadMedida, builder: (column) => column);
 
   GeneratedColumn<DateTime> get fechaCreacion => $composableBuilder(
       column: $table.fechaCreacion, builder: (column) => column);
@@ -1370,8 +1422,9 @@ class $$IngredientesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> nombre = const Value.absent(),
-            Value<int> cantidad = const Value.absent(),
+            Value<double> cantidad = const Value.absent(),
             Value<double> costoUnitario = const Value.absent(),
+            Value<String> unidadMedida = const Value.absent(),
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion(
@@ -1379,13 +1432,15 @@ class $$IngredientesTableTableManager extends RootTableManager<
             nombre: nombre,
             cantidad: cantidad,
             costoUnitario: costoUnitario,
+            unidadMedida: unidadMedida,
             fechaCreacion: fechaCreacion,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String nombre,
-            required int cantidad,
+            required double cantidad,
             required double costoUnitario,
+            Value<String> unidadMedida = const Value.absent(),
             Value<DateTime> fechaCreacion = const Value.absent(),
           }) =>
               IngredientesCompanion.insert(
@@ -1393,6 +1448,7 @@ class $$IngredientesTableTableManager extends RootTableManager<
             nombre: nombre,
             cantidad: cantidad,
             costoUnitario: costoUnitario,
+            unidadMedida: unidadMedida,
             fechaCreacion: fechaCreacion,
           ),
           withReferenceMapper: (p0) => p0

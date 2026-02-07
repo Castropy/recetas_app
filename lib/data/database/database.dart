@@ -21,7 +21,7 @@ LazyDatabase _openConnection() {
 class Ingredientes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get nombre => text().withLength(min: 1, max: 40)();
-  IntColumn get cantidad => integer()();
+  RealColumn get cantidad => real()();
  // 🟢 CAMBIO CLAVE: Precio Total se convierte en Costo Unitario
   RealColumn get costoUnitario => real()();
   // 🟢 Nueva columna: Valores posibles 'g', 'ml', 'und'
@@ -84,7 +84,7 @@ class _RecetaVentaInfo {
 class AppDatabase extends _$AppDatabase { 
   AppDatabase() : super(_openConnection());
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
   @override
 MigrationStrategy get migration { // 🟢 CAMBIO CLAVE: Usar MigrationStrategy
   return MigrationStrategy(
@@ -100,6 +100,10 @@ MigrationStrategy get migration { // 🟢 CAMBIO CLAVE: Usar MigrationStrategy
         // La versión anterior era 1, solo necesitamos crear la nueva tabla.
         await m.createTable(transacciones);
       }
+     if (from < 3) {
+        await m.addColumn(ingredientes, ingredientes.unidadMedida);
+      }
+      
     },
     // Otras opciones si las necesitas:
     // beforeOpen: (details) async {...} 
