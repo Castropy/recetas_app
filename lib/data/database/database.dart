@@ -23,7 +23,9 @@ class Ingredientes extends Table {
   TextColumn get nombre => text().withLength(min: 1, max: 40)();
   IntColumn get cantidad => integer()();
  // 🟢 CAMBIO CLAVE: Precio Total se convierte en Costo Unitario
-  RealColumn get costoUnitario => real()(); 
+  RealColumn get costoUnitario => real()();
+  // 🟢 Nueva columna: Valores posibles 'g', 'ml', 'und'
+  TextColumn get unidadMedida => text().withDefault(const Constant('g'))();
  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
 }
 
