@@ -85,28 +85,34 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   @override
   int get schemaVersion => 3;
-  @override
-MigrationStrategy get migration { // 🟢 CAMBIO CLAVE: Usar MigrationStrategy
+ 
+@override
+MigrationStrategy get migration {
   return MigrationStrategy(
-   onCreate: (Migrator m) async { // 🟢 ¡Añade 'async' aquí!
-  // El método onCreate, por convención de Drift, es asíncrono.
-  // Drift se encarga de llamar a m.createAll() implícitamente,
-  // pero si quieres que sea explícito (buena práctica), podrías añadir:
-  await m.createAll();
-},
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
     onUpgrade: (Migrator m, int from, int to) async {
-      // Esta es la lógica que se ejecuta al pasar de una versión anterior a una nueva.
+      // Versión 1 a 2: Crear tabla de transacciones
       if (from < 2) {
-        // La versión anterior era 1, solo necesitamos crear la nueva tabla.
         await m.createTable(transacciones);
       }
-     if (from < 3) {
-        await m.addColumn(ingredientes, ingredientes.unidadMedida);
-      }
       
+      // Versión 2 a 3: Nueva columna y cambio de tipo
+      if (from < 3) {
+        // 1. Añadimos la nueva columna de unidad de medida
+        await m.addColumn(ingredientes, ingredientes.unidadMedida);
+        
+        // NOTA: No necesitas un comando especial para cambiar Int a Real 
+        // en SQLite mediante Migrator, pero si notas que los datos viejos 
+        // dan error al leerse, podrías necesitar una migración de tabla completa.
+        // Por ahora, addColumn es lo correcto para unidadMedida.
+      }
     },
-    // Otras opciones si las necesitas:
-    // beforeOpen: (details) async {...} 
+    beforeOpen: (details) async {
+      // Activar llaves foráneas siempre es buena práctica al abrir
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
   );
 }
 
