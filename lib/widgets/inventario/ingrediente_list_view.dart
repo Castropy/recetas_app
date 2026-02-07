@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart'; 
 import 'package:recetas_app/providers/inventario_form_notifier.dart'; 
-import 'package:recetas_app/widgets/shared/icon_button_custom.dart'; // Contiene DeleteButton
+import 'package:recetas_app/widgets/shared/icon_button_custom.dart'; 
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart'; 
 
 class IngredienteListView extends StatelessWidget {
@@ -43,17 +43,23 @@ class IngredienteListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final ing = ingredientes[index];
         
+        // 🟢 CÁLCULO DE PRECIO PARA VISUALIZACIÓN
+        // Si es gramos/milis, mostramos precio por 1000 (Kilo/Litro)
+        // Si es unidades, mostramos el costo unitario tal cual.
+        double precioParaMostrar = (ing.unidadMedida == 'und') 
+            ? ing.costoUnitario 
+            : ing.costoUnitario * 1000.0;
+
         return Card(
-          color: const Color.fromARGB(255, 201, 209, 218), // Gris claro del estilo solicitado
+          color: const Color.fromARGB(255, 201, 209, 218),
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ), 
           child: ListTile(
             onTap: null, 
-            // 🟢 NUEVO: CircleAvatar con el ID del ingrediente
             leading: CircleAvatar(
-              backgroundColor: const Color.fromARGB(255, 45, 85, 216), // Azul primario para resaltar el ID
+              backgroundColor: const Color.fromARGB(255, 45, 85, 216),
               child: Text(
                 '${ing.id}',
                 style: const TextStyle(
@@ -72,7 +78,7 @@ class IngredienteListView extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              'Stock: ${ing.cantidad} | Precio: \$${ing.costoUnitario.toStringAsFixed(2)}',
+              'Stock: ${ing.cantidad}${ing.unidadMedida} | Precio: \$${precioParaMostrar.toStringAsFixed(2)}',
               style: const TextStyle(
                 color: Color.fromARGB(179, 24, 23, 23),
                 fontSize: 14,
@@ -82,7 +88,6 @@ class IngredienteListView extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Botón Editar con scroll automático
                 IconButton(
                   icon: const Icon(Icons.edit, color: Color.fromARGB(255, 7, 7, 7), size: 20),
                   onPressed: () {
@@ -101,7 +106,6 @@ class IngredienteListView extends StatelessWidget {
                     });
                   },
                 ),
-                // Botón Borrar (Custom)
                 DeleteButton(
                   ingredienteId: ing.id,
                   onDelete: deleteIngrediente,

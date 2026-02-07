@@ -4,7 +4,6 @@ import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/search_notifier.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
-
 import 'package:recetas_app/widgets/inventario/ingrediente_list_view.dart';
 import 'package:recetas_app/widgets/inventario/inventario_action_buttons.dart';
 import 'package:recetas_app/widgets/shared/inventario_form_fields.dart';
@@ -16,37 +15,25 @@ class ScreenInventario extends StatelessWidget {
   bool _filterItem(Ingrediente item, String query, SearchFilter filter) {
     if (query.isEmpty) return true;
     final q = query.toLowerCase();
-
     switch (filter) {
-      case SearchFilter.nombre:
-        return item.nombre.toLowerCase().contains(q);
-      case SearchFilter.id:
-        return item.id.toString().contains(q);
-      case SearchFilter.precio:
-        return item.costoUnitario.toStringAsFixed(2).contains(q);
+      case SearchFilter.nombre: return item.nombre.toLowerCase().contains(q);
+      case SearchFilter.id: return item.id.toString().contains(q);
+      case SearchFilter.precio: return item.costoUnitario.toStringAsFixed(2).contains(q);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Usamos read para acciones puntuales, pero Consumer para la UI reactiva
+    // 🟢 CLAVE: Usamos read para obtener la referencia sin suscribir el build entero
     final inventarioNotifier = context.read<InventarioFormNotifier>();
     final db = context.read<AppDatabase>();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text(
-          'Inventario',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 30,
-            color: Color.fromARGB(255, 45, 85, 216),
-          ),
-        ),
+        title: const Text('Inventario', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: Color.fromARGB(255, 45, 85, 216))),
         centerTitle: true,
       ),
-      // Botones de acción (Guardar/Cerrar)
       floatingActionButton: InventarioActionButtons(
         inventarioNotifier: inventarioNotifier,
         formVisibilityNotifier: context.watch<FormVisibilityNotifier>(),
@@ -56,74 +43,44 @@ class ScreenInventario extends StatelessWidget {
           builder: (context, visibilityNotifier, child) {
             return Column(
               children: [
-                // 1. Buscador fijo arriba
                 const CustomSearchBar(),
-
-                // 2. Contenido con Scroll (Formulario + Lista)
                 Expanded(
                   child: ListView(
+                    key: const PageStorageKey('inventario_scroll'),
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                     children: [
-                      // Formulario dinámico
                       if (visibilityNotifier.isVisible) ...[
                         const SizedBox(height: 10),
                         
-                        // 🟢 CLAVE: Consumer para que el formulario reaccione al cambio de unidad
-                        Consumer<InventarioFormNotifier>(
-                          builder: (context, notifier, child) {
-                            return InventarioFormFields(inventarioNotifier: notifier);
-                          },
-                        ),
+                        // 🟢 AQUÍ ESTÁ EL CAMBIO: No envolvemos todo el formulario en un Consumer.
+                        // Solo pasamos el notifier. Dentro de InventarioFormFields es donde
+                        // pondrás el Consumer específicamente en el Dropdown de unidades.
+                        InventarioFormFields(inventarioNotifier: inventarioNotifier),
                         
                         const SizedBox(height: 10),
                       ],
 
                       const SizedBox(height: 15),
 
-                      // 3. Lista de ingredientes desde la DB
                       StreamBuilder<List<Ingrediente>>(
                         stream: db.watchInventarioIngredientes(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
+                            return const Center(child: CircularProgressIndicator());
                           }
-                          
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: Text('No hay ingredientes registrados.'),
-                              ),
-                            );
+                            return const Center(child: Padding(padding: EdgeInsets.only(top: 40), child: Text('No hay ingredientes registrados.')));
                           }
 
                           final todos = snapshot.data!;
 
-                          // Filtrado reactivo mediante SearchNotifier
                           return Consumer<SearchNotifier>(
                             builder: (context, search, child) {
-                              final filtrados = todos
-                                  .where((item) => _filterItem(item, search.query, search.filter))
-                                  .toList();
-
-                              if (filtrados.isEmpty) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 40),
-                                    child: Text(
-                                      'No se hallaron resultados para "${search.query}"',
-                                      style: const TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                );
-                              }
+                              final filtrados = todos.where((item) => _filterItem(item, search.query, search.filter)).toList();
+                              if (filtrados.isEmpty) return const Center(child: Text('Sin resultados.'));
 
                               return IngredienteListView(
+                                key: const ValueKey('lista_ingredientes'),
                                 ingredientes: filtrados,
                                 notifier: inventarioNotifier,
                                 visibilityNotifier: visibilityNotifier,
@@ -132,7 +89,6 @@ class ScreenInventario extends StatelessWidget {
                           );
                         },
                       ),
-                      // Espacio extra inferior
                       const SizedBox(height: 100),
                     ],
                   ),
