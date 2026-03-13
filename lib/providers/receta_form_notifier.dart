@@ -18,7 +18,6 @@ class RecetaFormNotifier extends ChangeNotifier {
   String get nombre => _nombre;
   List<RecipeIngredientModel> get ingredientesSeleccionados => _ingredientesSeleccionados;
 
-  // 🟢 El costo total ahora es dinámico y exacto basado en el modelo
   double get costoTotal {
     return _ingredientesSeleccionados.fold(0.0, (sum, item) => sum + item.costoSubtotal);
   } 
@@ -50,13 +49,13 @@ class RecetaFormNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 🟢 CARGA DE RECETA (Modo Edición) corregido para manejar unidades
   Future<void> loadRecetaToEdit(int id) async {
     if (_idReceta == id) return; 
 
     clearForm(); 
 
-    final detailsMap = await db.getRecetaDetails(id);
+    // 🛠️ CORRECCIÓN: Usar recetasDao
+    final detailsMap = await db.recetasDao.getRecetaDetails(id);
     
     if (detailsMap.isEmpty) {
       debugPrint('Error: Receta con ID $id no encontrada.');
@@ -71,7 +70,9 @@ class RecetaFormNotifier extends ChangeNotifier {
     _nombre = receta.nombre;
 
     final List<int> idsNecesarios = ingredientesDB.map((ri) => ri.ingredienteId).toList();
-    final List<Ingrediente> inventarioIngredientes = await db.getIngredientesByIds(idsNecesarios);
+    
+    // 🛠️ CORRECCIÓN: Usar ingredientesDao
+    final List<Ingrediente> inventarioIngredientes = await db.ingredientesDao.getIngredientesByIds(idsNecesarios);
 
     final Map<int, Ingrediente> ingredienteMap = {
       for (var item in inventarioIngredientes) item.id: item
@@ -85,16 +86,13 @@ class RecetaFormNotifier extends ChangeNotifier {
         return null;
       }
 
-      // 🟢 ASIGNACIÓN CORRECTA: Pasamos los datos puros al modelo.
-      // Ya NO dividimos entre 1000 aquí. El RecipeIngredientModel detectará
-      // si es 'und', 'g' o 'ml' y aplicará la fórmula correcta.
       return RecipeIngredientModel(
         ingredienteId: ri.ingredienteId,
         nombre: ingrediente.nombre,
         precioUnitario: ingrediente.costoUnitario,
         cantidadNecesaria: ri.cantidadNecesaria,
-        stockInventario: ingrediente.cantidad,     // Nueva propiedad necesaria
-        unidadMedida: ingrediente.unidadMedida,    // Nueva propiedad necesaria
+        stockInventario: ingrediente.cantidad, 
+        unidadMedida: ingrediente.unidadMedida,
       );
     }).whereType<RecipeIngredientModel>().toList();
 
@@ -108,7 +106,6 @@ class RecetaFormNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 🟢 PERSISTENCIA: Guardar Receta
   Future<void> guardarReceta(BuildContext context) async {
     final nombreReceta = _nombre.trim();
     if (nombreReceta.isEmpty || _ingredientesSeleccionados.isEmpty) {
@@ -137,7 +134,8 @@ class RecetaFormNotifier extends ChangeNotifier {
         );
       }).toList();
 
-      await db.saveRecetaTransaction(recetaCompanion, ingredientesCompanion);
+      // 🛠️ CORRECCIÓN: Usar recetasDao
+      await db.recetasDao.saveRecetaTransaction(recetaCompanion, ingredientesCompanion);
       
       clearForm();
       if (context.mounted) {
@@ -153,7 +151,6 @@ class RecetaFormNotifier extends ChangeNotifier {
     }
   }
 
-  // 🟢 ACTUALIZACIÓN
   Future<void> _actualizarReceta(BuildContext context, String nombreReceta) async {
     if (_idReceta == null) return;
 
@@ -173,7 +170,9 @@ class RecetaFormNotifier extends ChangeNotifier {
         );
       }).toList();
 
-      await db.updateRecetaTransaction(recetaCompanion, ingredientesCompanion);
+      // 🛠️ CORRECCIÓN: Usar recetasDao
+      // Asegúrate de que este método exista en tu recetas_dao.dart
+      await db.recetasDao.updateRecetaTransaction(recetaCompanion, ingredientesCompanion);
 
       clearForm();
       if (context.mounted) {
@@ -190,12 +189,11 @@ class RecetaFormNotifier extends ChangeNotifier {
   }
 
   Stream<List<Ingrediente>> watchInventarioIngredientes() {
-    return db.watchInventarioIngredientes();
+    // 🛠️ CORRECCIÓN: Usar ingredientesDao
+    return db.ingredientesDao.watchInventarioIngredientes();
   }
 
-  // 🟢 HELPER DE UI: Transforma Ingrediente de DB a Modelo de UI
   RecipeIngredientModel createModelFromIngrediente(Ingrediente ingrediente) {
-    // Al añadir un ingrediente nuevo, inyectamos sus metadatos de unidad y stock
     return RecipeIngredientModel(
       ingredienteId: ingrediente.id,
       nombre: ingrediente.nombre,

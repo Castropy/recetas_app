@@ -118,6 +118,43 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
     });
   }
 
+  Future<void> updateRecetaTransaction(
+      Receta receta, 
+      List<RecetaIngredientesCompanion> nuevosIngredientes) async {
+    
+    // 🔔 Obtener el estado 'antes' para el JSON de detalles
+    final Receta? recetaAntes = await (select(recetas)..where((tbl) => tbl.id.equals(receta.id))).getSingleOrNull();
+
+    await transaction(() async {
+      // 1. Actualizar los datos de la receta
+      await update(recetas).replace(receta); 
+
+      // 2. Limpiar ingredientes anteriores
+      await (delete(recetaIngredientes)
+          ..where((tbl) => tbl.recetaId.equals(receta.id)))
+        .go();
+
+      // 3. Insertar los nuevos ingredientes
+      await batch((batch) {
+        batch.insertAll(recetaIngredientes, nuevosIngredientes);
+      });
+      
+      // 🟢 REGISTRO DE HISTORIAL (Edición de Receta)
+      final String detallesJson = '''{
+          "antes": {"nombre": "${recetaAntes?.nombre}", "costo": ${recetaAntes?.costoTotal.toStringAsFixed(2)}},
+          "despues": {"nombre": "${receta.nombre}", "costo": ${receta.costoTotal.toStringAsFixed(2)}}
+      }''';
+
+      // Llamamos al DAO de transacciones a través de la instancia de la DB
+      await db.transaccionesDao.insertTransaccion(TransaccionesCompanion.insert(
+        tipo: 'Edición',
+        entidad: 'Receta',
+        entidadId: Value(receta.id),
+        detalles: detallesJson,
+      ));
+    });
+  }
+
   Stream<List<Receta>> watchAllRecetasFiltered(String query, SearchFilter filter) {
     final baseQuery = select(recetas);
     if (query.isEmpty) return baseQuery.watch();
