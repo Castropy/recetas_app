@@ -1,11 +1,15 @@
 import 'package:drift/drift.dart';
 import '../database/database.dart';
+import '../tables/tables.dart'; // Aseguramos el acceso a la clase Ingredientes
 
 part 'ingredientes_dao.g.dart';
 
 @DriftAccessor(tables: [Ingredientes])
 class IngredientesDao extends DatabaseAccessor<AppDatabase> with _$IngredientesDaoMixin {
   IngredientesDao(super.db);
+
+  // Getter explícito para resolver el error de "Undefined name 'ingredientes'"
+  $IngredientesTable get ingredientes => db.ingredientes;
 
   // Obtener todos los ingredientes
   Future<List<Ingrediente>> getAllIngredientes() => select(ingredientes).get();
