@@ -74,7 +74,8 @@ class InventarioFormNotifier extends ChangeNotifier {
 
     try {
       if (_editingIngredienteId != null) {
-        await db.updateIngrediente(Ingrediente(
+        // 🛠️ CORRECCIÓN: Llamada a través de ingredientesDao
+        await db.ingredientesDao.updateIngrediente(Ingrediente(
           id: _editingIngredienteId!,
           nombre: nombreTexto,
           cantidad: cant,
@@ -83,7 +84,8 @@ class InventarioFormNotifier extends ChangeNotifier {
           fechaCreacion: _ingredienteAntes!.fechaCreacion,
         ));
       } else {
-        await db.insertIngrediente(IngredientesCompanion.insert(
+        // 🛠️ CORRECCIÓN: Llamada a través de ingredientesDao
+        await db.ingredientesDao.insertIngrediente(IngredientesCompanion.insert(
           nombre: nombreTexto,
           cantidad: cant,
           costoUnitario: costoRealUnitario,
