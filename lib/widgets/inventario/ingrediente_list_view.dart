@@ -21,8 +21,8 @@ class IngredienteListView extends StatelessWidget {
   void deleteIngrediente(BuildContext context, int id) async {
     final database = Provider.of<AppDatabase>(context, listen: false);
     try {
-      await database.deleteIngrediente(id);
-      if (!context.mounted) return;
+await database.ingredientesDao.deleteIngrediente(id);      
+if (!context.mounted) return;
       NotificacionSnackBar.mostrarSnackBar(context, 'Ingrediente eliminado exitosamente');
     } catch (e) {
       if (!context.mounted) return;
