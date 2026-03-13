@@ -43,7 +43,7 @@ class ScreenRecetas extends StatelessWidget {
           Expanded(
             child: StreamBuilder<List<Receta>>(
               // 🟢 CAMBIO CLAVE: Usamos el stream filtrado con los valores del Notifier
-              stream: db.watchAllRecetasFiltered(
+              stream: db.recetasDao.watchAllRecetasFiltered(
                 searchNotifier.query,
                 searchNotifier.filter,
               ),
@@ -129,7 +129,7 @@ class ScreenRecetas extends StatelessWidget {
                                 // 2. Si se confirma (es 'true'), se procede a la eliminación
                                 if (confirmed == true) {
                                   // Ejecuta la transacción de eliminación en la DB
-                                  db.deleteRecetaTransaction(receta.id);
+                                  await db.recetasDao.deleteRecetaTransaction(receta.id);
 
                                   // Muestra un mensaje de éxito
                                   if (context.mounted) {
