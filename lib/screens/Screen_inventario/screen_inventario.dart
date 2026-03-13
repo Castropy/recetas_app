@@ -63,7 +63,7 @@ class ScreenInventario extends StatelessWidget {
                       const SizedBox(height: 15),
 
                       StreamBuilder<List<Ingrediente>>(
-                        stream: db.watchInventarioIngredientes(),
+                        stream: db.ingredientesDao.watchInventarioIngredientes(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(child: CircularProgressIndicator());
