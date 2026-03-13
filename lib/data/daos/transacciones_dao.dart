@@ -1,11 +1,15 @@
 import 'package:drift/drift.dart';
 import '../database/database.dart';
+import '../tables/tables.dart'; // Importante para reconocer la clase Transacciones
 
 part 'transacciones_dao.g.dart';
 
 @DriftAccessor(tables: [Transacciones])
 class TransaccionesDao extends DatabaseAccessor<AppDatabase> with _$TransaccionesDaoMixin {
   TransaccionesDao(super.db);
+
+  // Getter explícito para resolver el error de "Undefined name 'transacciones'"
+  $TransaccionesTable get transacciones => db.transacciones;
 
   // Inserción de una Transacción
   Future<int> insertTransaccion(TransaccionesCompanion transaccion) {
