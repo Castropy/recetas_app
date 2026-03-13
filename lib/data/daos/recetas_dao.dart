@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
+
+// Importamos la base de datos y el unificador de tablas
 import '../database/database.dart';
+import '../tables/tables.dart'; 
 import 'package:recetas_app/providers/search_notifier.dart';
 
 part 'recetas_dao.g.dart';
@@ -9,10 +12,15 @@ part 'recetas_dao.g.dart';
 class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
   RecetasDao(super.db);
 
-  // Obtener todas las recetas (Stream)
+  // Getter para facilitar el acceso a tablas desde el DAO
+  // (Esto ayuda a resolver los errores de "Undefined name")
+  $RecetasTable get recetas => db.recetas;
+  $IngredientesTable get ingredientes => db.ingredientes;
+  $RecetaIngredientesTable get recetaIngredientes => db.recetaIngredientes;
+  $TransaccionesTable get transacciones => db.transacciones;
+
   Stream<List<Receta>> watchAllRecetas() => select(recetas).watch();
 
-  // Obtener detalles de una receta (Map)
   Future<Map<Receta, List<RecetaIngrediente>>> getRecetaDetails(int id) async {
     final receta = await (select(recetas)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     if (receta == null) return {};
@@ -24,7 +32,6 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
     return {receta: ingredientesList};
   }
 
-  // Guardar receta con transaccion
   Future<void> saveRecetaTransaction(
       RecetasCompanion receta, 
       List<RecetaIngredientesCompanion> ingredientesItems) async {
@@ -36,8 +43,7 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
 
       await batch((batch) => batch.insertAll(recetaIngredientes, listToInsert));
       
-      // NOTA: Acceso directo a tabla para evitar error de getter en AppDatabase
-      await into(transacciones).insert(TransaccionesCompanion.insert(
+      await db.transaccionesDao.insertTransaccion(TransaccionesCompanion.insert(
         tipo: 'Alta',
         entidad: 'Receta',
         entidadId: Value(recetaId),
@@ -46,7 +52,6 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
     });
   }
 
-  // Eliminar receta y sus ingredientes vinculados
   Future<void> deleteRecetaTransaction(int recetaId) async {
     final recetaAEliminar = await (select(recetas)..where((tbl) => tbl.id.equals(recetaId))).getSingleOrNull();
 
@@ -58,8 +63,7 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
           'Receta no encontrada' : 
           '{"nombre": "${recetaAEliminar.nombre}", "costo": ${recetaAEliminar.costoTotal.toStringAsFixed(2)}}';
 
-      // NOTA: Acceso directo a tabla para evitar error de getter en AppDatabase
-      await into(transacciones).insert(TransaccionesCompanion.insert(
+      await db.transaccionesDao.insertTransaccion(TransaccionesCompanion.insert(
         tipo: 'Eliminado',
         entidad: 'Receta',
         entidadId: Value(recetaId),
@@ -68,7 +72,6 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
     });
   }
 
-  // Venta de receta (Descuento de stock y validación)
   Future<void> venderRecetaTransaction(int recetaId) async {
     final ingredientesDeReceta = await (select(recetaIngredientes).join([
       innerJoin(ingredientes, recetaIngredientes.ingredienteId.equalsExp(ingredientes.id))
@@ -102,8 +105,7 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
             .write(IngredientesCompanion(cantidad: Value(nuevoStock)));
       }
       
-      // NOTA: Acceso directo a tabla para evitar error de getter en AppDatabase
-      await into(transacciones).insert(TransaccionesCompanion.insert(
+      await db.transaccionesDao.insertTransaccion(TransaccionesCompanion.insert(
         tipo: 'Venta',
         entidad: 'Receta',
         entidadId: Value(recetaId),
@@ -116,7 +118,6 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
     });
   }
 
-  // Filtrado de recetas
   Stream<List<Receta>> watchAllRecetasFiltered(String query, SearchFilter filter) {
     final baseQuery = select(recetas);
     if (query.isEmpty) return baseQuery.watch();
@@ -139,7 +140,6 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
   }
 }
 
-// Clases de soporte
 class InsufficientStockException implements Exception {
   final String nombreIngrediente;
   final double requerido;
