@@ -29,7 +29,7 @@ class DetalleRecetaScreen extends StatelessWidget {
       // Usamos FutureBuilder para esperar el resultado de la consulta a la DB
       body: FutureBuilder<Map<Receta, List<RecetaIngrediente>>>(
         // Llama al nuevo método para obtener la receta y sus ingredientes
-        future: db.getRecetaDetails(recetaId),
+        future: db.recetasDao.getRecetaDetails(recetaId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -70,7 +70,7 @@ class _RecetaDetailBody extends StatelessWidget {
 
     // 🟢 Paso 2: Usar FutureBuilder para buscar TODOS los objetos Ingrediente (Nombres)
     return FutureBuilder<List<Ingrediente>>(
-      future: db.getIngredientesByIds(ids), 
+      future: db.ingredientesDao.getIngredientesByIds(ids), 
       builder: (context, snapshotIngredientes) {
         // Mantenemos la lógica de carga para esta segunda consulta
         if (snapshotIngredientes.connectionState == ConnectionState.waiting) {
