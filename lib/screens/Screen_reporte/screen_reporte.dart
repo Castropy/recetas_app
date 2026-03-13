@@ -22,7 +22,7 @@ class ScreenReporte extends StatelessWidget {
         centerTitle: true,
       ),
       body: StreamBuilder<List<Transaccione>>(
-        stream: db.watchAllTransacciones(),
+        stream: db.transaccionesDao.watchAllTransacciones(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
