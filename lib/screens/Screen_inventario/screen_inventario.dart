@@ -15,23 +15,39 @@ class ScreenInventario extends StatelessWidget {
   bool _filterItem(Ingrediente item, String query, SearchFilter filter) {
     if (query.isEmpty) return true;
     final q = query.toLowerCase();
+
     switch (filter) {
-      case SearchFilter.nombre: return item.nombre.toLowerCase().contains(q);
-      case SearchFilter.id: return item.id.toString().contains(q);
-      case SearchFilter.precio: return item.costoUnitario.toStringAsFixed(2).contains(q);
+      case SearchFilter.nombre:
+        return item.nombre.toLowerCase().contains(q);
+      case SearchFilter.id:
+        return item.id.toString().contains(q);
+      case SearchFilter.precio:
+        // 🟢 USAMOS EL CAMPO CORRECTO: unidadMedida
+        // Aplicamos la misma lógica de conversión que en el ListView
+        double precioVisual = (item.unidadMedida == 'und') 
+            ? item.costoUnitario 
+            : item.costoUnitario * 1000.0;
+
+        return precioVisual.toStringAsFixed(2).contains(q);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🟢 CLAVE: Usamos read para obtener la referencia sin suscribir el build entero
     final inventarioNotifier = context.read<InventarioFormNotifier>();
     final db = context.read<AppDatabase>();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Inventario', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: Color.fromARGB(255, 45, 85, 216))),
+        title: const Text(
+          'Inventario',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 30,
+            color: Color.fromARGB(255, 45, 85, 216),
+          ),
+        ),
         centerTitle: true,
       ),
       floatingActionButton: InventarioActionButtons(
@@ -51,17 +67,10 @@ class ScreenInventario extends StatelessWidget {
                     children: [
                       if (visibilityNotifier.isVisible) ...[
                         const SizedBox(height: 10),
-                        
-                        // 🟢 AQUÍ ESTÁ EL CAMBIO: No envolvemos todo el formulario en un Consumer.
-                        // Solo pasamos el notifier. Dentro de InventarioFormFields es donde
-                        // pondrás el Consumer específicamente en el Dropdown de unidades.
                         InventarioFormFields(inventarioNotifier: inventarioNotifier),
-                        
                         const SizedBox(height: 10),
                       ],
-
                       const SizedBox(height: 15),
-
                       StreamBuilder<List<Ingrediente>>(
                         stream: db.ingredientesDao.watchInventarioIngredientes(),
                         builder: (context, snapshot) {
@@ -69,14 +78,22 @@ class ScreenInventario extends StatelessWidget {
                             return const Center(child: CircularProgressIndicator());
                           }
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Center(child: Padding(padding: EdgeInsets.only(top: 40), child: Text('No hay ingredientes registrados.')));
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 40),
+                                child: Text('No hay ingredientes registrados.'),
+                              ),
+                            );
                           }
 
                           final todos = snapshot.data!;
 
                           return Consumer<SearchNotifier>(
                             builder: (context, search, child) {
-                              final filtrados = todos.where((item) => _filterItem(item, search.query, search.filter)).toList();
+                              final filtrados = todos
+                                  .where((item) => _filterItem(item, search.query, search.filter))
+                                  .toList();
+
                               if (filtrados.isEmpty) return const Center(child: Text('Sin resultados.'));
 
                               return IngredienteListView(
