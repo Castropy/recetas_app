@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:recetas_app/screens/Screen_recetas/widgets/detalle_receta_screen.dart';
+import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 
 // Importaciones de base de datos y providers
 import 'data/database/database.dart';
