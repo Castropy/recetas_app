@@ -4,9 +4,9 @@ import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/inventario_form_notifier.dart';
 import 'package:recetas_app/providers/search_notifier.dart';
 import 'package:recetas_app/providers/form_visibility_notifier.dart';
-import 'package:recetas_app/widgets/inventario/ingrediente_list_view.dart';
-import 'package:recetas_app/widgets/inventario/inventario_action_buttons.dart';
-import 'package:recetas_app/widgets/shared/inventario_form_fields.dart';
+import 'package:recetas_app/screens/Screen_inventario/widgets/ingrediente_list_view.dart';
+import 'package:recetas_app/screens/Screen_inventario/widgets/inventario_action_buttons.dart';
+import 'package:recetas_app/screens/Screen_inventario/widgets/inventario_form_fields.dart';
 import 'package:recetas_app/widgets/shared/custom_search_bar.dart';
 
 class ScreenInventario extends StatelessWidget {
