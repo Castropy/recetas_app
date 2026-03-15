@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:recetas_app/data/database/database.dart'; // Importa tu modelo Transaccione
-import 'package:recetas_app/widgets/reporte/transaccion_card.dart'; // Importa el nuevo widget
+import 'package:recetas_app/screens/Screen_reporte/widgets/transaccion_card.dart'; // Importa el nuevo widget
 
 class HistorialListView extends StatelessWidget {
   final List<Transaccione> transacciones;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
-import 'package:recetas_app/widgets/reporte/historial_list_view.dart'; 
+import 'package:recetas_app/screens/Screen_reporte/widgets/historial_list_view.dart'; 
 
 class ScreenReporte extends StatelessWidget {
   const ScreenReporte({super.key});
