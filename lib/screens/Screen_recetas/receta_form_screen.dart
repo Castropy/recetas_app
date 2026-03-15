@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/models/recipe_ingredient_model.dart';
 import 'package:recetas_app/providers/receta_form_notifier.dart';
-//import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart';
 
 class RecetaFormScreen extends StatelessWidget {
   static const String routeName = 'receta_form';
@@ -31,31 +30,45 @@ class RecetaFormScreen extends StatelessWidget {
         title: Text(recetaId == null ? 'Crear Receta' : 'Editar Receta', 
           style: const TextStyle(
             fontWeight: FontWeight.w900,
-            fontSize: 30,
+            fontSize: 28, // Un poco más pequeño para evitar overflow en AppBars estrechos
             color: Color.fromARGB(255, 45, 85, 216),
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _NombreRecetaField(notifier: notifier),
-            const SizedBox(height: 20),
-            Text('Ingredientes Necesarios', style: theme.textTheme.titleMedium),
-            const Divider(),
-            _IngredienteSelector(notifier: notifier),
-            const SizedBox(height: 10),
-            _ListaIngredientesSeleccionados(notifier: notifier),
-            const SizedBox(height: 100),
-          ],
+      // SafeArea para proteger el contenido inferior
+      body: SafeArea(
+        child: SingleChildScrollView(
+          // BouncingScrollPhysics da una mejor sensación al llegar al final
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _NombreRecetaField(notifier: notifier),
+              const SizedBox(height: 20),
+              Text('Ingredientes Necesarios', style: theme.textTheme.titleMedium),
+              const Divider(),
+              _IngredienteSelector(notifier: notifier),
+              const SizedBox(height: 10),
+              _ListaIngredientesSeleccionados(notifier: notifier),
+              // Espacio extra para que el contenido no quede pegado al bottomBar
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: Padding(
+      // Usamos el padding del sistema para evitar que el botón tape el contenido
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, -2))
+          ],
+        ),
         padding: EdgeInsets.only(
           left: 16.0, 
           right: 16.0, 
+          top: 10,
           bottom: MediaQuery.of(context).padding.bottom + 10,
         ),
         child: _CostoTotalSection(notifier: notifier),
@@ -71,9 +84,12 @@ class _NombreRecetaField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      // Usamos controller o key para asegurar que el texto no se pierda al reconstruir
       initialValue: notifier.nombre,
+      textCapitalization: TextCapitalization.sentences,
       decoration: const InputDecoration(
         labelText: 'Nombre de la Receta',
+        prefixIcon: Icon(Icons.restaurant_menu),
         border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       ),
@@ -92,12 +108,18 @@ class _IngredienteSelector extends StatelessWidget {
       stream: notifier.watchInventarioIngredientes(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No hay ingredientes en el inventario.'));
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('No hay ingredientes en el inventario.', textAlign: TextAlign.center),
+            ),
+          );
         }
         final ingredientes = snapshot.data!;
         return DropdownButtonFormField<Ingrediente>(
           decoration: const InputDecoration(
             labelText: 'Seleccionar Ingrediente',
+            prefixIcon: Icon(Icons.add_shopping_cart),
             border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
           ),
           hint: const Text('Elige un ingrediente...'),
@@ -105,7 +127,7 @@ class _IngredienteSelector extends StatelessWidget {
           items: ingredientes.map((ingrediente) {
             return DropdownMenuItem<Ingrediente>(
               value: ingrediente,
-              child: Text(ingrediente.nombre),
+              child: Text('${ingrediente.nombre} (${ingrediente.unidadMedida})'),
             );
           }).toList(),
           onChanged: (ingrediente) {
@@ -126,8 +148,6 @@ class _IngredienteSelector extends StatelessWidget {
       orElse: () => RecipeIngredientModel(
         ingredienteId: ingrediente.id,
         nombre: ingrediente.nombre,
-        // 🟢 CORRECCIÓN: Quitamos el "/ 1000.0". 
-        // El precio ya viene estandarizado desde la DB gracias al InventarioNotifier.
         precioUnitario: ingrediente.costoUnitario, 
         cantidadNecesaria: 0,
         stockInventario: ingrediente.cantidad,
@@ -141,15 +161,24 @@ class _IngredienteSelector extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Cantidad de ${ingrediente.nombre} (${ingrediente.unidadMedida})'),
-          content: TextFormField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Cantidad Necesaria',
-              border: OutlineInputBorder(),
-            ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text('Cantidad: ${ingrediente.nombre}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Unidad de medida: ${ingrediente.unidadMedida}', style: const TextStyle(color: Colors.grey)),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Cantidad Necesaria',
+                  suffixText: ingrediente.unidadMedida,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -166,7 +195,6 @@ class _IngredienteSelector extends StatelessWidget {
                   final newItem = RecipeIngredientModel(
                     ingredienteId: ingrediente.id,
                     nombre: ingrediente.nombre,
-                    // 🟢 CORRECCIÓN: Aquí también quitamos la división.
                     precioUnitario: ingrediente.costoUnitario,
                     cantidadNecesaria: cantidad,
                     stockInventario: ingrediente.cantidad,
@@ -192,11 +220,9 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (notifier.ingredientesSeleccionados.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 20.0),
-          child: Text('Agregue ingredientes a la receta.'),
-        ),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 30),
+        child: Center(child: Text('Agregue ingredientes a la receta.', style: TextStyle(color: Colors.grey))),
       );
     }
     
@@ -207,12 +233,12 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = notifier.ingredientesSeleccionados[index];
         return Card( 
-          color: Colors.yellow[100], // Un poco más suave que el amarillo puro
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), 
-          elevation: 1,
+          color: Colors.blue[50], // Azul muy claro para diferenciar de la pantalla de inventario
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
+          elevation: 0.5,
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
-            leading: const Icon(Icons.shopping_basket_outlined, color: Colors.indigo),
+            leading: const Icon(Icons.check_box_outlined, color: Colors.blue),
             title: Text(item.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('${item.cantidadNecesaria} ${item.unidadMedida}'),
             trailing: Text(
@@ -220,7 +246,6 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             onTap: () {
-              // Re-creamos el objeto ingrediente para abrir el diálogo
               final ingredienteDB = Ingrediente(
                 id: item.ingredienteId, 
                 nombre: item.nombre, 
@@ -251,27 +276,29 @@ class _CostoTotalSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Costo Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Costo de Producción:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             Text(
               '\$${notifier.costoTotal.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 22, 
-                fontWeight: FontWeight.bold, 
-                color: Theme.of(context).colorScheme.secondary
+                fontWeight: FontWeight.w900, 
+                color: Theme.of(context).colorScheme.primary
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         ElevatedButton.icon(
           onPressed: notifier.ingredientesSeleccionados.isEmpty 
               ? null 
               : () => notifier.guardarReceta(context),
-          icon: const Icon(Icons.save),
-          label: const Text('Guardar Receta'),
+          icon: const Icon(Icons.save_rounded),
+          label: const Text('GUARDAR RECETA', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ],
