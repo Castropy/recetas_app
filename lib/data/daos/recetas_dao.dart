@@ -170,7 +170,16 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
         whereClause = recetas.id.equals(int.tryParse(query) ?? -1);
         break;
       case SearchFilter.precio:
-        whereClause = recetas.costoTotal.isBiggerOrEqual(Constant(double.tryParse(query) ?? -1.0));
+        // 🟢 MEJORA: Convertimos el double a String en la DB para poder usar 'like'
+        // Esto permite que si escribes "12", encuentre "12.50" o "112.00"
+        final doubleQuery = double.tryParse(query);
+        if (doubleQuery != null) {
+          // Opción A: Buscar por coincidencia parcial (más flexible)
+          whereClause = recetas.costoTotal.cast<String>().like(normalizedQuery);
+        } else {
+          // Si no es un número válido, devolvemos algo que no rompa la consulta
+          whereClause = const Constant(false);
+        }
         break;
     }
     return (baseQuery..where((_) => whereClause)).watch();
