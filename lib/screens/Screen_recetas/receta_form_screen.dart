@@ -27,18 +27,17 @@ class RecetaFormScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(recetaId == null ? 'Crear Receta' : 'Editar Receta', 
+        title: Text(
+          recetaId == null ? 'Crear Receta' : 'Editar Receta', 
           style: const TextStyle(
             fontWeight: FontWeight.w900,
-            fontSize: 28, // Un poco más pequeño para evitar overflow en AppBars estrechos
+            fontSize: 28,
             color: Color.fromARGB(255, 45, 85, 216),
           ),
         ),
       ),
-      // SafeArea para proteger el contenido inferior
       body: SafeArea(
         child: SingleChildScrollView(
-          // BouncingScrollPhysics da una mejor sensación al llegar al final
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -51,18 +50,16 @@ class RecetaFormScreen extends StatelessWidget {
               _IngredienteSelector(notifier: notifier),
               const SizedBox(height: 10),
               _ListaIngredientesSeleccionados(notifier: notifier),
-              // Espacio extra para que el contenido no quede pegado al bottomBar
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-      // Usamos el padding del sistema para evitar que el botón tape el contenido
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
           boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, -2))
+            BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, -2))
           ],
         ),
         padding: EdgeInsets.only(
@@ -84,7 +81,6 @@ class _NombreRecetaField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      // Usamos controller o key para asegurar que el texto no se pierda al reconstruir
       initialValue: notifier.nombre,
       textCapitalization: TextCapitalization.sentences,
       decoration: const InputDecoration(
@@ -117,6 +113,8 @@ class _IngredienteSelector extends StatelessWidget {
         }
         final ingredientes = snapshot.data!;
         return DropdownButtonFormField<Ingrediente>(
+          // ✅ FIX: Evita que el menú tape toda la pantalla si hay muchos items
+          menuMaxHeight: 350, 
           decoration: const InputDecoration(
             labelText: 'Seleccionar Ingrediente',
             prefixIcon: Icon(Icons.add_shopping_cart),
@@ -127,7 +125,10 @@ class _IngredienteSelector extends StatelessWidget {
           items: ingredientes.map((ingrediente) {
             return DropdownMenuItem<Ingrediente>(
               value: ingrediente,
-              child: Text('${ingrediente.nombre} (${ingrediente.unidadMedida})'),
+              child: Text(
+                '${ingrediente.nombre} (${ingrediente.unidadMedida})',
+                overflow: TextOverflow.ellipsis,
+              ),
             );
           }).toList(),
           onChanged: (ingrediente) {
@@ -166,7 +167,7 @@ class _IngredienteSelector extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Unidad de medida: ${ingrediente.unidadMedida}', style: const TextStyle(color: Colors.grey)),
+              Text('Unidad: ${ingrediente.unidadMedida}', style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 15),
               TextFormField(
                 controller: controller,
@@ -233,7 +234,7 @@ class _ListaIngredientesSeleccionados extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = notifier.ingredientesSeleccionados[index];
         return Card( 
-          color: Colors.blue[50], // Azul muy claro para diferenciar de la pantalla de inventario
+          color: Colors.blue[50], 
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
           elevation: 0.5,
           margin: const EdgeInsets.symmetric(vertical: 4),
