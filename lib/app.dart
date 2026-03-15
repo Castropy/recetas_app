@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:recetas_app/screens/Screen_recetas/widgets/detalle_receta_screen.dart';
 
 // Importaciones de base de datos y providers
 import 'data/database/database.dart';
@@ -13,7 +14,6 @@ import 'package:recetas_app/providers/botton_nav_provider.dart';
 
 // Pantallas
 import 'package:recetas_app/screens/Screen_recetas/screen_recetas.dart';
-import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 import 'package:recetas_app/screens/pantalla_principal/pantalla_principal.dart';
 import 'package:recetas_app/screens/Screen_recetas/receta_form_screen.dart';
 
