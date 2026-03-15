@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; 
 import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
 import 'data/database/database.dart';
@@ -6,6 +7,13 @@ import 'data/database/database.dart';
 Future<void> main() async {
   // 1. Inicialización de bindings de Flutter
   WidgetsFlutterBinding.ensureInitialized(); 
+
+  // 1.1. Configuración de orientación (Bloqueo Vertical)
+  // Se usa await para asegurar que la configuración se aplique antes de lanzar la app
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // 2. Configuración de localización y fechas
   final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale.toString();
