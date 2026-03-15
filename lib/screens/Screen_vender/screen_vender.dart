@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
 import 'package:recetas_app/providers/vender_notifier.dart';
-import 'package:recetas_app/widgets/vender/vender_button_section.dart';
+import 'package:recetas_app/screens/Screen_vender/widgets/vender_button_section.dart';
 
 class ScreenVender extends StatelessWidget {
   const ScreenVender({super.key});
