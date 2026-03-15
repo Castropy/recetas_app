@@ -90,6 +90,10 @@ class _NombreRecetaField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       ),
       onChanged: notifier.updateNombre,
+      // 🟢 FIX: Cierra el teclado al tocar fuera del campo
+      onTapOutside: (event) {
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 }
@@ -113,7 +117,6 @@ class _IngredienteSelector extends StatelessWidget {
         }
         final ingredientes = snapshot.data!;
         return DropdownButtonFormField<Ingrediente>(
-          // ✅ FIX: Evita que el menú tape toda la pantalla si hay muchos items
           menuMaxHeight: 350, 
           decoration: const InputDecoration(
             labelText: 'Seleccionar Ingrediente',
@@ -178,6 +181,10 @@ class _IngredienteSelector extends StatelessWidget {
                   suffixText: ingrediente.unidadMedida,
                   border: const OutlineInputBorder(),
                 ),
+                // 🟢 También añadimos el cierre de teclado en el diálogo por consistencia
+                onTapOutside: (event) {
+                  FocusScope.of(context).unfocus();
+                },
               ),
             ],
           ),
