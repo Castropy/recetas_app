@@ -1,3 +1,8 @@
+// Widgets de composición de pantalla
+export 'receta_data_view.dart';
+export 'receta_list_card.dart';
+
+// Widgets de formulario y detalle (los que ya tenías)
 export 'costo_total_section.dart';
 export 'detalle_ingredientes_list.dart';
 export 'detalle_receta_header.dart';
