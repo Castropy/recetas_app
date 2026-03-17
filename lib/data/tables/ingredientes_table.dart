@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 
 class Ingredientes extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get nombre => text().withLength(min: 1, max: 40)();
+  TextColumn get nombre => text().withLength(min: 1, max: 100)();
   RealColumn get cantidad => real()();
   RealColumn get costoUnitario => real()();
   TextColumn get unidadMedida => text().withDefault(const Constant('g'))();
