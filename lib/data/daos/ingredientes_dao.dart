@@ -7,7 +7,7 @@ part 'ingredientes_dao.g.dart';
 @DriftAccessor(tables: [Ingredientes])
 class IngredientesDao extends DatabaseAccessor<AppDatabase> with _$IngredientesDaoMixin {
   IngredientesDao(super.db);
-
+  @override 
   // Getter explícito para resolver el error de "Undefined name 'ingredientes'"
   $IngredientesTable get ingredientes => db.ingredientes;
 

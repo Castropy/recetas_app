@@ -14,9 +14,13 @@ class RecetasDao extends DatabaseAccessor<AppDatabase> with _$RecetasDaoMixin {
 
   // Getter para facilitar el acceso a tablas desde el DAO
   // (Esto ayuda a resolver los errores de "Undefined name")
+  @override 
   $RecetasTable get recetas => db.recetas;
+  @override
   $IngredientesTable get ingredientes => db.ingredientes;
+  @override
   $RecetaIngredientesTable get recetaIngredientes => db.recetaIngredientes;
+  @override
   $TransaccionesTable get transacciones => db.transacciones;
 
   Stream<List<Receta>> watchAllRecetas() => select(recetas).watch();
