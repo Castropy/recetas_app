@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Importante para el context.read
 import 'package:recetas_app/providers/receta_form_notifier.dart';
+import 'package:recetas_app/providers/ad_state_provider.dart'; // Nuevo
+import 'package:recetas_app/helpers/ad_helper.dart'; // Nuevo
 
-/// Sección inferior que muestra el resumen de costos y el botón de acción.
-/// 
-/// Se recomienda usarlo dentro del [bottomNavigationBar] del Scaffold
-/// para mantenerlo siempre visible mientras el usuario agrega ingredientes.
 class CostoTotalSection extends StatelessWidget {
   final RecetaFormNotifier notifier;
 
@@ -58,10 +57,21 @@ class CostoTotalSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            // El botón se deshabilita automáticamente si no hay ingredientes
             onPressed: notifier.ingredientesSeleccionados.isEmpty 
                 ? null 
-                : () => notifier.guardarReceta(context),
+                : () async {
+                    // 1. Ejecutamos el guardado de la receta
+                    await notifier.guardarReceta(context);
+
+                    // 2. Lógica de Anuncios:
+                    // Registramos la interacción y lanzamos si llegamos al límite
+                    if (context.mounted) {
+                      final adProvider = context.read<AdStateProvider>();
+                      if (adProvider.recordInteraction()) {
+                        AdHelper.showInterstitialAd();
+                      }
+                    }
+                  },
             icon: const Icon(Icons.save_rounded),
             label: const Text(
               'GUARDAR RECETA', 
