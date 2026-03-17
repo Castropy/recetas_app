@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Importante para el read
 import 'package:recetas_app/providers/form_visibility_notifier.dart'; 
 import 'package:recetas_app/providers/inventario_form_notifier.dart'; 
+import 'package:recetas_app/providers/ad_state_provider.dart'; // Nuevo
+import 'package:recetas_app/helpers/ad_helper.dart'; // Nuevo
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart'; 
 
 class InventarioActionButtons extends StatelessWidget {
@@ -17,10 +20,9 @@ class InventarioActionButtons extends StatelessWidget {
   Widget _buildViewModeButtons(BuildContext context) {
     return FloatingActionButton(
       key: const ValueKey('viewMode'),
-      // Color azul consistente con tu AppBar
       backgroundColor: const Color.fromARGB(255, 45, 85, 216),
       onPressed: () {
-        inventarioNotifier.clearForm(); // Asegura que el formulario esté limpio
+        inventarioNotifier.clearForm();
         formVisibilityNotifier.showForm();
       },
       child: const Icon(Icons.add_rounded, size: 35, color: Colors.white),
@@ -34,7 +36,6 @@ class InventarioActionButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // Botón Cancelar (Circular pequeño)
         FloatingActionButton.small(
           heroTag: 'cancelBtn',
           backgroundColor: Colors.redAccent,
@@ -45,7 +46,6 @@ class InventarioActionButtons extends StatelessWidget {
           child: const Icon(Icons.close_rounded, color: Colors.white),
         ),
         const SizedBox(width: 12),
-        // Botón Guardar (Extendec con texto e icono)
         FloatingActionButton.extended(
           heroTag: 'saveBtn',
           backgroundColor: Colors.green,
@@ -70,6 +70,15 @@ class InventarioActionButtons extends StatelessWidget {
                     ? '¡Ingrediente actualizado con éxito!'
                     : '¡Ingrediente guardado con éxito!',
               );
+
+              // --- LÓGICA DE ANUNCIOS ---
+              // Registramos la interacción y si devuelve true, lanzamos el anuncio
+              final adProvider = context.read<AdStateProvider>();
+              if (adProvider.recordInteraction()) {
+                AdHelper.showInterstitialAd();
+              }
+              // --------------------------
+
             } else {
               NotificacionSnackBar.mostrarSnackBar(
                 context,
@@ -84,7 +93,6 @@ class InventarioActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos ListenableBuilder para reaccionar a la visibilidad del formulario
     return ListenableBuilder(
       listenable: formVisibilityNotifier,
       builder: (context, child) {
@@ -92,13 +100,12 @@ class InventarioActionButtons extends StatelessWidget {
 
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          // Animación de escala para que los botones aparezcan/desaparezcan con estilo
           transitionBuilder: (Widget child, Animation<double> animation) {
             return ScaleTransition(scale: animation, child: child);
           },
           child: isFormVisible
-              ? _buildEditModeButtons(context) // Guardar y Cancelar
-              : _buildViewModeButtons(context), // Solo Agregar
+              ? _buildEditModeButtons(context)
+              : _buildViewModeButtons(context),
         );
       },
     );
