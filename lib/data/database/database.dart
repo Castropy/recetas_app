@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -53,9 +53,13 @@ class AppDatabase extends _$AppDatabase {
         if (from < 3) {
           await m.addColumn(ingredientes, ingredientes.unidadMedida);
         }
-        // Versión 3 a 4: Ampliar límite de caracteres en 'nombre'
+        // Versión 3 a 4: Ampliar límite de caracteres en 'nombre' de ingredientes
         if (from < 4) {
           await m.alterTable(TableMigration(ingredientes));
+        }
+        // Versión 4 a 5: Ampliar límite de caracteres en 'nombre' de recetas
+        if (from < 5) {
+          await m.alterTable(TableMigration(recetas));
         }
       },
       beforeOpen: (details) async {
