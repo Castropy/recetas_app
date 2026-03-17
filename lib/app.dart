@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:recetas_app/providers/ad_state_provider.dart';
 import 'package:recetas_app/screens/Screen_recetas/detalle_receta_screen.dart';
 
 // Importaciones de base de datos y providers
@@ -36,6 +37,7 @@ class RecetasApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BottomNavBarProvider()),
         ChangeNotifierProvider(create: (_) => FormVisibilityNotifier()),
         ChangeNotifierProvider(create: (_) => SearchNotifier()),
+        ChangeNotifierProvider(create:  (_) => AdStateProvider()), // Nuevo provider para anuncios
 
         // Providers que dependen de la DB (Inyección de dependencia)
         ChangeNotifierProvider(
