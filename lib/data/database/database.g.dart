@@ -371,7 +371,7 @@ class $RecetasTable extends Recetas with TableInfo<$RecetasTable, Receta> {
   late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
       'nombre', aliasedName, false,
       additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 40),
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 100),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
   static const VerificationMeta _costoTotalMeta =
