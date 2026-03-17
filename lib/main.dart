@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart'; 
 import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
 import 'data/database/database.dart';
@@ -7,8 +8,10 @@ import 'data/database/database.dart';
 Future<void> main() async {
   // 1. Inicialización de bindings de Flutter
   WidgetsFlutterBinding.ensureInitialized(); 
+  // 1.2. Inicialización de Google Mobile Ads
+  MobileAds.instance.initialize();
 
-  // 1.1. Configuración de orientación (Bloqueo Vertical)
+  // 1.3. Configuración de orientación (Bloqueo Vertical)
   // Se usa await para asegurar que la configuración se aplique antes de lanzar la app
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
