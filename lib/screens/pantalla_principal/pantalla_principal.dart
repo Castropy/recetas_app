@@ -29,7 +29,9 @@ class PantallaPrincipal extends StatelessWidget {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min, // Ajusta el tamaño al contenido
         children: [
-          const AdBannerWidget(), // El banner aparecerá siempre sobre el BottomNavigationBar
+          const AdBannerWidget(),
+          const SizedBox(width: 8), // Espacio entre el banner y el BottomNavigationBar
+           // El banner aparecerá siempre sobre el BottomNavigationBar
           BottomNavigationBar(
             selectedItemColor: const Color.fromARGB(255, 247, 247, 248),
             unselectedItemColor: const Color.fromARGB(214, 160, 168, 177),
