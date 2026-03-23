@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:recetas_app/data/helpers/exceptions.dart';
 import '../database/database.dart';
 import '../tables/tables.dart'; // Aseguramos el acceso a la clase Ingredientes
+import 'package:drift/native.dart'; 
 
 part 'ingredientes_dao.g.dart';
 
@@ -25,9 +27,24 @@ class IngredientesDao extends DatabaseAccessor<AppDatabase> with _$IngredientesD
   }
 
   // Eliminar ingrediente por ID
-  Future<int> deleteIngrediente(int id) {
-    return (delete(ingredientes)..where((tbl) => tbl.id.equals(id))).go();
-  } 
+  Future<void> deleteIngrediente(int id) async {
+    try {
+      final rowsDeleted = await (delete(ingredientes)..where((tbl) => tbl.id.equals(id))).go();
+      
+      // Opcional: Si quieres ser extra robusto, podrías validar si se borró algo
+      if (rowsDeleted == 0) {
+        throw Exception('No se encontró el ingrediente');
+      }
+    } catch (e) {
+      // Capturamos específicamente el error de Foreign Key (787)
+      if (e is SqliteException && (e.extendedResultCode == 787 || e.resultCode == 19)) {
+        throw IngredienteVinculadoException();
+      }
+      
+      // Si es otro error (disco lleno, db bloqueada, etc), lo lanzamos para depurar
+      rethrow;
+    }
+  }
 
   // Stream para observar el inventario en tiempo real (UI reactiva)
   Stream<List<Ingrediente>> watchInventarioIngredientes() => select(ingredientes).watch();
