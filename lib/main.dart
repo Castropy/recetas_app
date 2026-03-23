@@ -18,6 +18,12 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  //1.4 It hides both the status bar (top) and navigation bar (bottom)
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual, 
+    overlays: [SystemUiOverlay.top] // Only the top part remains visible
+  );
+
   // 2. Configuración de localización y fechas
   final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale.toString();
   await initializeDateFormatting(deviceLocale, null);
