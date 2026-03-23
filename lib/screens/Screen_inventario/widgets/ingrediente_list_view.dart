@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recetas_app/data/database/database.dart';
+import 'package:recetas_app/data/helpers/exceptions.dart'; // New import for custom exception
 import 'package:recetas_app/providers/form_visibility_notifier.dart'; 
 import 'package:recetas_app/providers/inventario_form_notifier.dart'; 
-import 'package:recetas_app/widgets/shared/icon_button_custom.dart'; 
+import 'package:recetas_app/widgets/shared/dependency_alert_dialog.dart'; // New import for the alert widget
+import 'package:recetas_app/widgets/shared/icon_button_custom.dart';
 import 'package:recetas_app/widgets/shared/notificacion_snack_bar.dart'; 
 
 class IngredienteListView extends StatelessWidget {
@@ -21,11 +23,23 @@ class IngredienteListView extends StatelessWidget {
   void deleteIngrediente(BuildContext context, int id) async {
     final database = Provider.of<AppDatabase>(context, listen: false);
     try {
-await database.ingredientesDao.deleteIngrediente(id);      
-if (!context.mounted) return;
-      NotificacionSnackBar.mostrarSnackBar(context, 'Ingrediente eliminado exitosamente');
-    } catch (e) {
+      await database.ingredientesDao.deleteIngrediente(id);      
       if (!context.mounted) return;
+      NotificacionSnackBar.mostrarSnackBar(context, 'Ingrediente eliminado exitosamente');
+    } 
+    // The method catches the specific referential integrity exception
+    on IngredienteVinculadoException catch (e) {
+      if (!context.mounted) return;
+      
+      // It triggers a technical alert dialog to inform the user about the existing dependency
+      showDialog(
+        context: context,
+        builder: (context) => DependencyAlertDialog(mensaje: e.mensaje),
+      );
+    }
+    catch (e) {
+      if (!context.mounted) return;
+      // It handles any other unexpected errors using the standard SnackBar notification
       NotificacionSnackBar.mostrarSnackBar(context, 'Error al eliminar ingrediente: $e');
     }
   }
@@ -106,6 +120,7 @@ if (!context.mounted) return;
                     });
                   },
                 ),
+                // The widget passes the deleteIngrediente function as a callback to the DeleteButton
                 DeleteButton(
                   ingredienteId: ing.id,
                   onDelete: deleteIngrediente,
