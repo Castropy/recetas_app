@@ -26,7 +26,7 @@ class InventarioFormFields extends StatelessWidget {
 
         const Text(
           "Unidad de medida:",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12),
         ),
         const SizedBox(height: 8),
         
